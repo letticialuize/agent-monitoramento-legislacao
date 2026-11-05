@@ -204,6 +204,21 @@ public class ResolvedorEsferaTests
     }
 }
 
+public class RelacaoTributariaTests
+{
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Sugestao_da_ia_registra_a_relacao_tributaria(bool relacionada)
+    {
+        var novidade = Novidades.Nova();
+        Assert.Null(novidade.RelacionadaTributos);
+
+        Assert.True(novidade.AplicarSugestaoIa([Perfil.ConsultorTributario], null, null, Dados.Agora, relacionada).Sucesso);
+        Assert.Equal(relacionada, novidade.RelacionadaTributos);
+    }
+}
+
 public class ClassificadorPerfilTests
 {
     private static readonly RegrasPerfil Regras = new("t", ["TRIB-NFE"], ["leiaute", "nota técnica", "API"], [Grupo.Tributos, Grupo.LegislacaoFederal], []);

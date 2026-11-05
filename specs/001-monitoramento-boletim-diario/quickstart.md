@@ -6,7 +6,7 @@ e entidades em [data-model.md](data-model.md); este guia não os repete.
 ## Pré-requisitos
 
 - .NET 10 SDK e Docker (Testcontainers sobe PostgreSQL, MongoDB e smtp4dev).
-- Segredos locais via `dotnet user-secrets` no projeto `Api.Agente` (nunca em arquivos versionados):
+- Segredos em `appsettings*.json` ou em `dotnet user-secrets` no projeto `Api.Agente` (constitution 5.1; user-secrets têm precedência em Development):
   `ConnectionStrings:Postgres`, `ConnectionStrings:Mongo`, `Smtp:*`, `Llm:ApiKey`,
   `Conectores:Inlabs:*`.
 - Configuração não secreta em `appsettings.Development.json`: `Llm:Modelo`, `Llm:Temperatura`,

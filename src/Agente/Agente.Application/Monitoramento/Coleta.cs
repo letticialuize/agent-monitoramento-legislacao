@@ -207,7 +207,15 @@ public sealed class ExecutarCicloColeta(
             }
         }
 
-        await classificar.ExecutarAsync(correlacaoId, ct);
+        // Esvazia a fila por lotes: para no primeiro lote sem resultado (fila vazia ou falha do LLM).
+        for (var lote = 0; lote < Math.Max(1, opcoes.Value.MaxLotesClassificacaoIa); lote++)
+        {
+            if (await classificar.ExecutarAsync(correlacaoId, ct) == 0)
+            {
+                break;
+            }
+        }
+
         return resultados;
     }
 }
@@ -230,6 +238,7 @@ public sealed class ClassificarNovidadesComLlm(
 
         Tarefa: para cada novidade normativa recebida, sugerir:
         - perfis: "desenvolvedor" quando tratar de layout, leiaute, schema, nota técnica, adequação de sistemas ou atualização de API; "consultor_tributario" quando tratar de especificações da legislação (obrigações, alíquotas, prazos, interpretação, jurisprudência) ou notícias sobre legislação; ambos quando atender aos dois.
+        - relacionadaTributos: true quando tratar de tributos, legislação tributária, obrigações fiscais, documentos fiscais eletrônicos e seus sistemas, fiscalização tributária ou jurisprudência tributária; false nos demais assuntos, mesmo que venha de órgão fazendário ou tribunal, como operações de apreensão, combate a crimes e contrabando (mesmo conduzidas pela Receita Federal), finanças públicas (dívida pública, Tesouro, resultado fiscal), mercado de carbono, agendas de sessões e eventos institucionais. Na dúvida, true.
         - tema: rótulo curto (até 120 caracteres).
         - impacto: "alto", "medio" ou "baixo", considerando apenas a ementa.
         - justificativa: até 500 caracteres, baseada apenas na ementa fornecida.
@@ -272,7 +281,7 @@ public sealed class ClassificarNovidadesComLlm(
                     .OfType<Perfil>()
                     .ToList();
                 Enumeracao.TentarLer<Impacto>(c["impacto"]!.GetValue<string>(), out var impacto);
-                if (novidade.AplicarSugestaoIa(perfis, c["tema"]!.GetValue<string>(), impacto, agora).Sucesso)
+                if (novidade.AplicarSugestaoIa(perfis, c["tema"]!.GetValue<string>(), impacto, agora, c["relacionadaTributos"]!.GetValue<bool>()).Sucesso)
                 {
                     aplicadas++;
                 }

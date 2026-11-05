@@ -317,6 +317,10 @@ namespace Agente.Infrastructure.Persistencia.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("perfis");
 
+                    b.Property<bool?>("RelacionadaTributos")
+                        .HasColumnType("boolean")
+                        .HasColumnName("relacionada_tributos");
+
                     b.Property<string>("ResponsavelInterno")
                         .IsRequired()
                         .HasColumnType("jsonb")

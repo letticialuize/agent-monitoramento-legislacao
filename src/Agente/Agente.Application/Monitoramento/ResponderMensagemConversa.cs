@@ -34,19 +34,33 @@ public sealed partial class ResponderMensagemConversa(
     IOptions<OpcoesConsulta> opcoesConsulta,
     ILogger<ResponderMensagemConversa> logger)
 {
+    /// <summary>Resposta a pedidos fora do tema do agente (FR-010b).</summary>
+    public const string MensagemForaDoEscopo =
+        "Não é possível responder a esta pergunta, pois este agente é especializado em notícias de âmbito tributário.";
+
     internal const string PromptSistema =
         ConteudoNaoConfiavel.RegrasBase +
-        """
+        $"""
 
-        Você é o agente de monitoramento de legislação e jurisprudência da Infis.
+        Você é o agente de monitoramento de legislação e jurisprudência tributária da Infis.
+        - Seu único assunto é o âmbito tributário: tributos, legislação tributária, obrigações fiscais, documentos fiscais eletrônicos e seus sistemas, fiscalização tributária e jurisprudência tributária.
+        - Se o pedido for sobre qualquer outro assunto, inclusive pedido de novidades ou notícias sobre tema não tributário (por exemplo, crimes, direito trabalhista, eleições ou esportes), não use ferramentas e responda exatamente, sem acrescentar nada: {MensagemForaDoEscopo}
+        - Pedidos de novidades sem assunto (por exemplo, "o que houve ontem?"), a informação da área de atuação do usuário e a continuação de um pedido anterior estão dentro do seu assunto.
         - Para qualquer pergunta sobre novidades, use a ferramenta buscar_novidades; para detalhar, use obter_novidade.
-        - Responda em português, de forma objetiva, separando as novidades por perfil (Consultor tributário / Desenvolvedor) e por esfera.
+        - Converta períodos da pergunta (hoje, ontem, esta semana, este mês) em dataInicio e dataFim a partir da data de hoje informada abaixo. Para um único dia, use a mesma data nos dois campos.
+        - Se a pergunta não citar um assunto específico, omita o argumento assunto para listar todas as novidades do período.
+        - O perfil padrão é consultor_tributario: use perfis=consultor_tributario quando o usuário não informar a própria área. Use perfis=desenvolvedor somente quando ele disser que atua em tecnologia ou desenvolvimento de software, e mantenha esse perfil durante a conversa.
+        - Responda em português, de forma objetiva, separando as novidades por esfera e dizendo para qual perfil é a resposta.
         - Cite cada novidade com órgão, tipo e número do ato, data de publicação e o link exatamente como retornado pela ferramenta.
         - Indique quando uma novidade requer revisão humana, está pendente de confirmação ou vem de fonte fora do catálogo.
         - Informe fontes com falha e itens omitidos quando a ferramenta os retornar.
         - Se a ferramenta não retornar novidades, diga que não foram encontradas novidades nas fontes consultadas, sem afirmar que não houve mudança normativa.
         - Esta versão não consulta dados de clientes nem envia e-mails.
         """;
+
+    /// <summary>Prompt com a data de hoje: sem ela, o modelo não sabe o que é "ontem".</summary>
+    internal static string PromptDoDia(DateOnly hoje) =>
+        PromptSistema + $"\n\nData de hoje: {hoje.ToString("dddd, dd/MM/yyyy", CultureInfo.GetCultureInfo("pt-BR"))} ({hoje:yyyy-MM-dd}).";
 
     public async Task<Resultado<RespostaMensagem>> ExecutarAsync(
         string conversaId,
@@ -98,7 +112,7 @@ public sealed partial class ResponderMensagemConversa(
 
             var etapaLlm = etapas.Iniciar(consulta, EtapaFluxo.Llm);
             var resposta = await orquestrador.ResponderAsync(
-                new RequisicaoConversa(contexto, PromptSistema, historico, mensagem, definicoes), ct);
+                new RequisicaoConversa(contexto, PromptDoDia(relogio.HojeLocal), historico, mensagem, definicoes), ct);
             etapas.Concluir(etapaLlm, resposta.Sucesso ? StatusEtapa.Sucesso : StatusEtapa.Falha, resposta.Erro);
 
             if (!resposta.Sucesso || string.IsNullOrWhiteSpace(resposta.Texto))
@@ -117,10 +131,11 @@ public sealed partial class ResponderMensagemConversa(
             if (violacoes.Count == 0)
             {
                 etapas.Concluir(etapaValidacao, StatusEtapa.Sucesso);
+                var textoFinal = SoEncontrouNaoTributarias(coletor) ? MensagemForaDoEscopo : resposta.Texto;
                 await memoria.AcrescentarAsync(usuario.UsuarioId, conversaId,
                 [
                     new MensagemConversa("usuario", texto, iniciado),
-                    new MensagemConversa("assistente", resposta.Texto, relogio.AgoraUtc),
+                    new MensagemConversa("assistente", textoFinal, relogio.AgoraUtc),
                 ], ct);
 
                 var envelopes = coletor.Envelopes;
@@ -129,13 +144,13 @@ public sealed partial class ResponderMensagemConversa(
                 var status = envelopes.Any(e => e.Status != StatusProcessamento.Concluido) || limitacoes.Count > 0
                     ? StatusProcessamento.ConcluidoComLimitacoes
                     : StatusProcessamento.Concluido;
-                if (envelopes.Count == 0)
+                if (envelopes.Count == 0 && resposta.Texto.Trim() != MensagemForaDoEscopo)
                 {
                     limitacoes.Add("O agente respondeu sem consultar a base de novidades.");
                 }
 
                 return Resultado<RespostaMensagem>.Ok(await Encerrar(
-                    consulta, iniciado, correlacaoId, status, resposta.Texto, coletor, achados, limitacoes, ct));
+                    consulta, iniciado, correlacaoId, status, textoFinal, coletor, achados, limitacoes, ct));
             }
 
             erroValidacao = string.Join("; ", violacoes);
@@ -153,6 +168,12 @@ public sealed partial class ResponderMensagemConversa(
             ["A resposta do LLM citou evidências não retornadas pelas ferramentas."],
             ct));
     }
+
+    /// <summary>A busca por assunto que só achou novidades não tributárias é um pedido fora do tema (FR-010b).</summary>
+    internal static bool SoEncontrouNaoTributarias(ColetorFerramentas coletor) =>
+        coletor.Novidades.Count == 0
+        && coletor.Envelopes.Count > 0
+        && coletor.Envelopes.All(e => e.Resultado is { OcultadasNaoTributarias: > 0 } r && r.Assunto != ConsultarNovidades.SemAssunto);
 
     /// <summary>Links e ids citados na resposta devem ter sido retornados pelas ferramentas.</summary>
     internal static List<string> ValidarCitacoes(string texto, ColetorFerramentas coletor)
@@ -201,7 +222,12 @@ public sealed partial class ResponderMensagemConversa(
         var ultimo = coletor.Envelopes.LastOrDefault()?.Resultado;
         ResultadoConsulta? resultado = ultimo is null
             ? null
-            : ultimo with { Novidades = novidades, FontesComFalha = coletor.Envelopes.SelectMany(e => e.Resultado!.FontesComFalha).Distinct().ToList() };
+            : ultimo with
+            {
+                Novidades = novidades,
+                FontesComFalha = coletor.Envelopes.SelectMany(e => e.Resultado!.FontesComFalha).Distinct().ToList(),
+                Grupos = AgrupadorNovidades.Agrupar(novidades, []),
+            };
 
         return new RespostaMensagem(mensagem, new EnvelopeResposta(
             EnvelopeResposta.VersaoAtual,

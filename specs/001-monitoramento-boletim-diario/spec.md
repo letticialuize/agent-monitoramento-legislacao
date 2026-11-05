@@ -29,6 +29,10 @@ agrupado por esfera e perfil, idempotente por dia."
   e confirmadas.
 - Q: Quais UFs e municípios entram na primeira versão? → A: Federal mais uma lista de UFs e uma
   lista de municípios.
+- Q: Como o usuário consulta? → A: Principalmente por pergunta em linguagem natural; a busca com
+  campos em JSON continua disponível. Sem assunto, listam-se todas as novidades do período.
+- Q: Qual perfil vale quando quem consulta não informa a própria área? → A: Consultor tributário. Dizendo que atua em tecnologia ou desenvolvimento de software, vale desenvolvedor.
+- Q: O agente trata de outros assuntos além do tributário? → A: Não. Novidades sem relação tributária ficam fora das respostas, e perguntas de outros assuntos recebem a resposta de que o agente é especializado em notícias de âmbito tributário.
 - Q: Em que ordem a feature é entregue? → A: Em três entregas: (1) chat e consulta de novidades
   classificadas por perfil, sem cliente e sem e-mail (US1); (2) cadastro de empresa e nicho e
   consulta das novidades que impactam o nicho (US3 + cadastro de clientes); (3) agendamento das 8h
@@ -240,13 +244,22 @@ verificar que consultas e boletim usam esses dados.
   layout, adequação de sistemas ou atualização de API (incluindo schemas e notas técnicas), e ao
   perfil consultor tributário quando tratar de especificações da legislação ou notícias sobre
   legislação; a novidade que atender aos dois critérios DEVE receber os dois perfis.
+- **FR-008a**: Sem perfil informado, a consulta DEVE usar consultor tributário; informando atuação em
+  tecnologia ou desenvolvimento de software, DEVE usar desenvolvedor.
+- **FR-008b**: Novidades sem relação tributária (indício da IA) DEVEM ficar fora das consultas e do boletim,
+  com a quantidade informada nas limitações e a opção `incluirNaoTributarias` para conferir na consulta
+  estruturada. Sem classificação da IA, a novidade NÃO DEVE ser ocultada.
 - **FR-009**: O sistema DEVE registrar a origem de cada classificação (regra determinística ou
   indício identificado pela IA).
 
 **Consulta sob demanda**
 
-- **FR-010**: Usuários DEVEM poder consultar novidades por assunto, com filtros opcionais de
+- **FR-010a**: Usuários DEVEM poder perguntar em linguagem natural (ex.: "O que houve de novidades
+  ontem?"), sem citar assunto; o agente interpreta o período a partir da data de hoje.
+- **FR-010**: Usuários DEVEM poder consultar novidades por assunto (opcional), com filtros opcionais de
   período, esfera, perfil e grupo do catálogo.
+- **FR-010b**: No chat, o pedido fora do âmbito tributário DEVE receber a resposta: "Não é possível responder a esta
+  pergunta, pois este agente é especializado em notícias de âmbito tributário." A mesma resposta vale para a busca por assunto que só encontrar novidades não tributárias.
 - **FR-011**: A resposta da consulta DEVE trazer as novidades agrupadas por situação, esfera e
   perfil, as fontes consultadas, as fontes que falharam e as limitações da busca.
 - **FR-012**: Quando não houver novidades, a resposta DEVE informar "sem novidades encontradas"

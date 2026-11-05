@@ -19,6 +19,6 @@ Regras comuns (Princípio XII):
 
 | Nome | Responsabilidade | Entrada | Saída | Testes mínimos |
 |---|---|---|---|---|
-| `buscar_novidades` | Buscar novidades por assunto e filtros | `assunto`, `periodo?`, `esferas?`, `perfis?`, `grupos?` | lista de `novidade` (formato do envelope), `fontesComFalha`, `itensOmitidos` | argumentos inválidos; papel ausente; sem resultados |
+| `buscar_novidades` | Buscar novidades por período e, opcionalmente, assunto e filtros | `assunto?`, `periodo?`, `esferas?`, `perfis?` (se omitido, `consultor_tributario`), `grupos?` | lista de `novidade` (formato do envelope), `fontesComFalha`, `itensOmitidos` | argumentos inválidos; papel ausente; sem resultados |
 | `buscar_novidades_cliente` | Mesmo que acima, cruzando com o nicho do cliente | `clienteNome`, `assunto?`, `periodo?` | lista de `novidade` com `relacaoNicho` | cliente inexistente; dados extras de cliente rejeitados |
 | `obter_novidade` | Detalhar uma novidade e suas evidências | `novidadeId` | `novidade` | id inexistente; novidade descartada não retornada |

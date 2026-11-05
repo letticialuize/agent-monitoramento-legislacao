@@ -34,7 +34,7 @@ public class ValidadorSaidaLlmTests
         new(cliente, Montagem.Opcoes(new OpcoesValidacaoLlm { RetentativasValidacao = 2 }), NullLogger<ValidadorSaidaLlm>.Instance);
 
     private const string Valido =
-        """{"classificacoes":[{"novidadeId":"a","perfis":["desenvolvedor"],"tema":"NF-e","impacto":"alto","justificativa":"leiaute"}]}""";
+        """{"classificacoes":[{"novidadeId":"a","perfis":["desenvolvedor"],"relacionadaTributos":true,"tema":"NF-e","impacto":"alto","justificativa":"leiaute"}]}""";
 
     [Fact]
     public async Task Aceita_saida_valida()

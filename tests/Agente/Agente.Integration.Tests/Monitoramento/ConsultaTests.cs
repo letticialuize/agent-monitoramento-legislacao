@@ -4,9 +4,11 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Agente.Domain.Comum;
 using Agente.Domain.Operacao;
+using Agente.Infrastructure.Persistencia;
 using Agente.Integration.Tests.Infra;
 using Json.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Agente.Integration.Tests.Monitoramento;
 
@@ -104,6 +106,60 @@ public sealed class ConsultaTests(ContainersFixture containers) : IAsyncLifetime
         Assert.Contains(env["achados"]!.AsArray(), a => a!["categoria"]!.GetValue<string>() == "ausencia_evidencia");
     }
 
+    [Fact]
+    public async Task Resposta_agrupa_por_perfil_esfera_e_situacao()
+    {
+        var env = await Consultar(new { assunto = "CBS" });
+
+        var perfil = Assert.Single(env["resultado"]!["grupos"]!.AsArray());
+        Assert.Equal("consultor_tributario", perfil!["perfil"]!.GetValue<string>());
+        Assert.Equal(2, perfil["total"]!.GetValue<int>());
+        var esfera = Assert.Single(perfil["esferas"]!.AsArray());
+        Assert.Equal("federal", esfera!["esfera"]!.GetValue<string>());
+        var situacoes = esfera["situacoes"]!.AsArray();
+        Assert.Equal(["confirmada", "fonte_nao_catalogada"], situacoes.Select(s => s!["situacao"]!.GetValue<string>()));
+        Assert.Equal(Simuladores.EmentaCamara, situacoes[0]!["novidades"]![0]!["ementa"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task Sem_assunto_lista_todas_as_novidades_do_periodo()
+    {
+        var doDia = await Consultar(new { periodo = new { inicio = "2026-10-28", fim = "2026-10-28" } });
+        Assert.Equal("(todas as novidades)", doDia["resultado"]!["assunto"]!.GetValue<string>());
+        Assert.Equal(3, Novidades(doDia).Count);
+        Assert.All(Novidades(doDia), n => Assert.Equal("2026-10-28", n!["dataPublicacao"]!.GetValue<string>()));
+
+        var padrao = await Consultar(new { });
+        Assert.Equal(4, Novidades(padrao).Count);
+    }
+
+    [Fact]
+    public async Task Novidade_sem_relacao_tributaria_fica_oculta_e_a_quantidade_e_informada()
+    {
+        using (var escopo = _app.Services.CreateScope())
+        {
+            var db = escopo.ServiceProvider.GetRequiredService<AgenteDbContext>();
+            var novidade = await db.Novidades.SingleAsync(n => n.Ementa == Simuladores.EmentaCamara);
+            Assert.True(novidade.AplicarSugestaoIa(novidade.Perfis, null, null, _app.Tempo.GetUtcNow(), relacionadaTributos: false).Sucesso);
+            await db.SaveChangesAsync();
+        }
+
+        var padrao = await Consultar(new { assunto = "CBS", incluirPendentes = false });
+        Assert.Empty(Novidades(padrao));
+        Assert.Contains(padrao["limitacoes"]!.AsArray(), l => l!.GetValue<string>().StartsWith("1 novidade(s) ocultada(s)", StringComparison.Ordinal));
+
+        var conferencia = await Consultar(new { assunto = "CBS", incluirPendentes = false, incluirNaoTributarias = true });
+        var oculta = Assert.Single(Novidades(conferencia));
+        Assert.False(oculta!["relacionadaTributos"]!.GetValue<bool>());
+        Assert.DoesNotContain(conferencia["limitacoes"]!.AsArray(), l => l!.GetValue<string>().Contains("ocultada", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Sem_novidades_grupos_vem_vazio()
+    {
+        var env = await Consultar(new { assunto = "assunto inexistente xyz" });
+        Assert.Empty(env["resultado"]!["grupos"]!.AsArray());
+    }
     [Fact]
     public async Task Filtro_por_perfil_e_esfera()
     {

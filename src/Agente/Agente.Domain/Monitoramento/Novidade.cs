@@ -62,6 +62,9 @@ public sealed class Novidade : RaizAgregado
 
     public Origem? OrigemImpacto { get; private set; }
 
+    /// <summary>Indício da IA; nulo enquanto não classificada. Só false oculta a novidade das consultas.</summary>
+    public bool? RelacionadaTributos { get; private set; }
+
     /// <summary>Verdadeiro quando as regras determinísticas decidiram o perfil.</summary>
     public bool PerfilDecidido { get; private set; }
 
@@ -216,7 +219,7 @@ public sealed class Novidade : RaizAgregado
     /// Aplica a sugestão da IA (indício). Perfis só são substituídos quando as regras não decidiram;
     /// tema e impacto ficam sempre marcados como indício.
     /// </summary>
-    public Resultado AplicarSugestaoIa(IReadOnlyList<Perfil> perfis, string? tema, Impacto? impacto, DateTimeOffset agora)
+    public Resultado AplicarSugestaoIa(IReadOnlyList<Perfil> perfis, string? tema, Impacto? impacto, DateTimeOffset agora, bool? relacionadaTributos = null)
     {
         ArgumentNullException.ThrowIfNull(perfis);
         if (!PerfilDecidido)
@@ -231,6 +234,8 @@ public sealed class Novidade : RaizAgregado
         }
 
         AguardandoClassificacaoIa = false;
+
+        RelacionadaTributos = relacionadaTributos;
 
         if (!string.IsNullOrWhiteSpace(tema))
         {

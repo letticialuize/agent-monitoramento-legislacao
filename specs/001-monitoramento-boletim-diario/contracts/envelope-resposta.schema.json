@@ -7,7 +7,7 @@
   "additionalProperties": false,
   "required": ["versaoContrato", "execucaoId", "correlacaoId", "status", "iniciadoEm", "finalizadoEm", "requerRevisaoHumana", "achados", "limitacoes", "consumo"],
   "properties": {
-    "versaoContrato": { "const": "1.0" },
+    "versaoContrato": { "const": "1.2" },
     "execucaoId": { "type": "string", "format": "uuid" },
     "correlacaoId": { "type": "string" },
     "status": {
@@ -38,7 +38,7 @@
     "resultadoConsulta": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["assunto", "periodo", "fontesConsultadas", "fontesComFalha", "novidades", "itensOmitidos"],
+      "required": ["assunto", "periodo", "fontesConsultadas", "fontesComFalha", "novidades", "itensOmitidos", "grupos"],
       "properties": {
         "assunto": { "type": "string" },
         "periodo": {
@@ -57,7 +57,42 @@
         "fontesComFalha": { "type": "array", "items": { "type": "string" } },
         "novidades": { "type": "array", "items": { "$ref": "#/$defs/novidade" } },
         "itensOmitidos": { "type": "integer", "minimum": 0, "description": "Quantidade cortada pelo limite de itens." },
-        "mensagemSemNovidades": { "type": "string", "description": "Presente quando novidades está vazio; nunca afirma ausência de mudança normativa." }
+        "ocultadasNaoTributarias": { "type": "integer", "minimum": 0, "description": "Quantidade ocultada por indício da IA de não ter relação tributária (FR-008b)." },
+        "mensagemSemNovidades": { "type": "string", "description": "Presente quando novidades está vazio; nunca afirma ausência de mudança normativa." },
+        "grupos": {
+          "type": "array",
+          "description": "As mesmas novidades agrupadas por perfil, esfera e situação (FR-011). Grupos vazios são omitidos. Uma novidade com dois perfis aparece nos dois; com filtro de perfil, só os perfis pedidos aparecem. Sem perfil informado, vale consultor_tributario.",
+          "items": { "$ref": "#/$defs/grupoPerfil" }
+        }
+      }
+    },
+    "grupoPerfil": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["perfil", "total", "esferas"],
+      "properties": {
+        "perfil": { "enum": ["consultor_tributario", "desenvolvedor"] },
+        "total": { "type": "integer", "minimum": 1 },
+        "esferas": { "type": "array", "items": { "$ref": "#/$defs/grupoEsfera" } }
+      }
+    },
+    "grupoEsfera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["esfera", "total", "situacoes"],
+      "properties": {
+        "esfera": { "enum": ["federal", "estadual", "municipal"] },
+        "total": { "type": "integer", "minimum": 1 },
+        "situacoes": { "type": "array", "items": { "$ref": "#/$defs/grupoSituacao" } }
+      }
+    },
+    "grupoSituacao": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["situacao", "novidades"],
+      "properties": {
+        "situacao": { "enum": ["confirmada", "pendente_confirmacao", "fonte_nao_catalogada", "em_analise"] },
+        "novidades": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/novidade" } }
       }
     },
     "novidade": {
@@ -100,7 +135,8 @@
             }
           }
         },
-        "requerRevisaoHumana": { "type": "boolean" }
+        "requerRevisaoHumana": { "type": "boolean" },
+        "relacionadaTributos": { "type": ["boolean", "null"], "description": "Indício da IA; null enquanto não classificada. false só aparece com incluirNaoTributarias." }
       }
     },
     "achado": {

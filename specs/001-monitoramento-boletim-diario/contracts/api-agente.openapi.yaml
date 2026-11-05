@@ -238,9 +238,8 @@ components:
     ConsultaRequest:
       type: object
       additionalProperties: false
-      required: [assunto]
       properties:
-        assunto: { type: string, minLength: 2, maxLength: 200 }
+        assunto: { type: string, minLength: 2, maxLength: 200, description: Opcional; sem ele lista todas as novidades do período }
         periodo:
           type: object
           additionalProperties: false
@@ -249,9 +248,10 @@ components:
             fim: { type: string, format: date }
           description: Padrão — últimos 7 dias corridos
         esferas: { type: array, items: { enum: [federal, estadual, municipal] } }
-        perfis: { type: array, items: { enum: [consultor_tributario, desenvolvedor] } }
+        perfis: { type: array, description: Sem informar usa consultor_tributario, items: { enum: [consultor_tributario, desenvolvedor] } }
         grupos: { type: array, items: { enum: [legislacao_federal, legislacao_estadual, legislacao_municipal, tributos, tribunais_judiciais, administrativos_contas] } }
         incluirPendentes: { type: boolean, default: true }
+        incluirNaoTributarias: { type: boolean, default: false, description: Mostra as novidades ocultadas por indício da IA de não terem relação tributária }
         clienteNome: { type: string, description: Nome de cliente cadastrado; nenhum outro dado de cliente é aceito }
     ClienteInput:
       type: object

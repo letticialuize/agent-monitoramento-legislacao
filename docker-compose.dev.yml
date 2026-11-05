@@ -1,5 +1,6 @@
 # Dependências locais da Api.Agente (somente desenvolvimento).
-# Credenciais abaixo são apenas para ambiente local; produção usa provedor de segredos.
+# Credenciais abaixo são apenas para ambiente local.
+# Portas fora do padrão (55432, 57017) para não colidir com bancos de outros projetos na máquina.
 services:
   postgres:
     image: postgres:17
@@ -8,14 +9,14 @@ services:
       POSTGRES_USER: agente
       POSTGRES_PASSWORD: agente_dev
     ports:
-      - "5432:5432"
+      - "55432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
   mongo:
     image: mongo:8
     ports:
-      - "27017:27017"
+      - "57017:27017"
     volumes:
       - mongo-data:/data/db
 

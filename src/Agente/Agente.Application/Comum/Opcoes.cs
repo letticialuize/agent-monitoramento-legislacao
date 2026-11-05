@@ -22,6 +22,8 @@ public sealed class OpcoesColeta
 
     public int LoteClassificacaoIa { get; set; } = 20;
 
+    public int MaxLotesClassificacaoIa { get; set; } = 10;
+
     public string ArquivoCatalogoInicial { get; set; } = string.Empty;
 
     public string AprovadorCatalogoInicial { get; set; } = string.Empty;

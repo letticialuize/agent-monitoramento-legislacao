@@ -106,6 +106,7 @@ internal sealed class NovidadeConfig : IEntityTypeConfiguration<Novidade>
         b.Property(x => x.OrigemPerfil).HasColumnName("origem_perfil").HasConversion<string>().HasMaxLength(30);
         b.Property(x => x.OrigemImpacto).HasColumnName("origem_impacto").HasConversion<string>().HasMaxLength(30);
         b.Property(x => x.PerfilDecidido).HasColumnName("perfil_decidido");
+        b.Property(x => x.RelacionadaTributos).HasColumnName("relacionada_tributos");
         b.Property(x => x.AguardandoClassificacaoIa).HasColumnName("aguardando_classificacao_ia");
         b.Property(x => x.Situacao).HasColumnName("situacao").HasConversion<string>().HasMaxLength(30);
         b.Property(x => x.RetificaNovidadeId).HasColumnName("retifica_novidade_id");

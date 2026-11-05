@@ -20,66 +20,90 @@ internal sealed class ConsultaNovidades(AgenteDbContext db) : IConsultaNovidades
     public async Task<PaginaNovidades> BuscarAsync(FiltroNovidades filtro, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(filtro);
-        var parametros = new List<NpgsqlParameter>
-        {
-            new("inicio", filtro.Inicio),
-            new("fim", filtro.Fim),
-            new("limite", filtro.Limite),
-        };
-
-        var sql = new StringBuilder(
+        var onde = new StringBuilder(
             """
-            SELECT n.id AS "Id", count(*) OVER () AS "Total"
-            FROM novidades n
-            WHERE n.data_publicacao BETWEEN @inicio AND @fim
+            n.data_publicacao BETWEEN @inicio AND @fim
               AND n.situacao <> 'Descartada'
             """);
 
         if (!filtro.IncluirPendentes)
         {
-            sql.AppendLine().Append("  AND n.situacao = 'Confirmada'");
+            onde.AppendLine().Append("  AND n.situacao = 'Confirmada'");
         }
 
         var termos = filtro.Termos.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
         if (termos.Count > 0)
         {
-            var consultas = new List<string>();
-            for (var i = 0; i < termos.Count; i++)
-            {
-                parametros.Add(new NpgsqlParameter($"t{i}", termos[i]));
-                consultas.Add($"plainto_tsquery('portuguese'::regconfig, agente_unaccent(@t{i}))");
-            }
-
-            sql.AppendLine().Append("  AND ").Append(EsquemaBusca.ExpressaoDocumento).Append(" @@ (").Append(string.Join(" || ", consultas)).Append(')');
+            var consultas = termos.Select((_, i) => $"plainto_tsquery('portuguese'::regconfig, agente_unaccent(@t{i}))");
+            onde.AppendLine().Append("  AND ").Append(EsquemaBusca.ExpressaoDocumento).Append(" @@ (").Append(string.Join(" || ", consultas)).Append(')');
         }
 
         if (filtro.Esferas.Count > 0)
         {
-            parametros.Add(new NpgsqlParameter("esferas", filtro.Esferas.Select(e => e.ToString()).ToArray()));
-            sql.AppendLine().Append("  AND n.esfera = ANY(@esferas)");
+            onde.AppendLine().Append("  AND n.esfera = ANY(@esferas)");
         }
 
         if (filtro.Grupos.Count > 0)
         {
-            parametros.Add(new NpgsqlParameter("grupos", filtro.Grupos.Select(e => e.ToString()).ToArray()));
-            sql.AppendLine().Append("  AND n.grupo = ANY(@grupos)");
+            onde.AppendLine().Append("  AND n.grupo = ANY(@grupos)");
         }
 
         if (filtro.Perfis.Count > 0)
         {
-            parametros.Add(new NpgsqlParameter("perfis", filtro.Perfis.Select(Enumeracao.ParaContrato).ToArray()));
-            sql.AppendLine().Append("  AND n.perfis ?| @perfis");
+            onde.AppendLine().Append("  AND n.perfis ?| @perfis");
         }
 
-        sql.AppendLine().Append("ORDER BY n.data_publicacao DESC, n.criado_em DESC LIMIT @limite");
+        // Um parâmetro do Npgsql não pode ser usado em dois comandos: cada consulta recebe os seus.
+        object[] Parametros(bool comLimite)
+        {
+            var p = new List<NpgsqlParameter> { new("inicio", filtro.Inicio), new("fim", filtro.Fim) };
+            p.AddRange(termos.Select((t, i) => new NpgsqlParameter($"t{i}", t)));
+            if (filtro.Esferas.Count > 0)
+            {
+                p.Add(new NpgsqlParameter("esferas", filtro.Esferas.Select(e => e.ToString()).ToArray()));
+            }
+
+            if (filtro.Grupos.Count > 0)
+            {
+                p.Add(new NpgsqlParameter("grupos", filtro.Grupos.Select(e => e.ToString()).ToArray()));
+            }
+
+            if (filtro.Perfis.Count > 0)
+            {
+                p.Add(new NpgsqlParameter("perfis", filtro.Perfis.Select(Enumeracao.ParaContrato).ToArray()));
+            }
+
+            if (comLimite)
+            {
+                p.Add(new NpgsqlParameter("limite", filtro.Limite));
+            }
+
+            return [.. p];
+        }
+
+        var ocultadas = 0;
+        if (!filtro.IncluirNaoTributarias)
+        {
+            var sqlOcultadas = $"SELECT count(*)::int AS \"Value\" FROM novidades n WHERE {onde} AND n.relacionada_tributos IS FALSE";
+            ocultadas = await db.Database.SqlQueryRaw<int>(sqlOcultadas, Parametros(false)).SingleAsync(ct);
+            onde.AppendLine().Append("  AND n.relacionada_tributos IS NOT FALSE");
+        }
+
+        var sql =
+            $"""
+            SELECT n.id AS "Id", count(*) OVER () AS "Total"
+            FROM novidades n
+            WHERE {onde}
+            ORDER BY n.data_publicacao DESC, n.criado_em DESC LIMIT @limite
+            """;
 
         var linhas = await db.Database
-            .SqlQueryRaw<Linha>(sql.ToString(), parametros.Cast<object>().ToArray())
+            .SqlQueryRaw<Linha>(sql, Parametros(true))
             .ToListAsync(ct);
 
         if (linhas.Count == 0)
         {
-            return new PaginaNovidades([], 0);
+            return new PaginaNovidades([], 0, ocultadas);
         }
 
         var ids = linhas.Select(l => l.Id).ToList();
@@ -87,7 +111,7 @@ internal sealed class ConsultaNovidades(AgenteDbContext db) : IConsultaNovidades
         var codigos = await CodigosFontesAsync(novidades, ct);
         var porId = novidades.ToDictionary(n => n.Id);
         var itens = ids.Where(porId.ContainsKey).Select(id => Mapear(porId[id], codigos)).ToList();
-        return new PaginaNovidades(itens, (int)linhas[0].Total);
+        return new PaginaNovidades(itens, (int)linhas[0].Total, ocultadas);
     }
 
     public async Task<NovidadeDto?> ObterAsync(Guid id, CancellationToken ct)
@@ -143,7 +167,8 @@ internal sealed class ConsultaNovidades(AgenteDbContext db) : IConsultaNovidades
             null,
             n.RetificaNovidadeId,
             evidencias,
-            n.RequerRevisaoHumana);
+            n.RequerRevisaoHumana,
+            n.RelacionadaTributos);
     }
 }
 

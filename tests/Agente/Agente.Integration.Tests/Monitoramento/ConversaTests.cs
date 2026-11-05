@@ -1,9 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json.Nodes;
+using Agente.Application.Monitoramento;
 using Agente.Domain.Operacao;
+using Agente.Infrastructure.Persistencia;
 using Agente.Integration.Tests.Infra;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -82,6 +85,26 @@ public sealed class ConversaTests(ContainersFixture containers) : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Pergunta_sobre_ontem_sem_assunto_usa_a_data_de_hoje_e_busca_o_dia()
+    {
+        var url = Simuladores.UrlSenado(_app.Fontes);
+        // O relógio de teste está em 29/10/2026: o modelo simulado converte "ontem" em 28/10.
+        Simuladores.Conversa(_app.OpenAi, "novidades-buscar_novidades", new { dataInicio = "2026-10-28", dataFim = "2026-10-28" }, $"Ontem houve a Lei 15526 (Senado Federal): {url}");
+
+        var (status, corpo) = await Enviar("conv-ontem", "O que houve de novidades ontem?");
+
+        Assert.Equal(HttpStatusCode.OK, status);
+        Assert.Contains(url, corpo["mensagem"]!.GetValue<string>(), StringComparison.Ordinal);
+        var env = corpo["envelope"]!;
+        Assert.NotEqual("falha_tecnica", env["status"]!.GetValue<string>());
+        Assert.Equal("(todas as novidades)", env["resultado"]!["assunto"]!.GetValue<string>());
+        Assert.All(env["resultado"]!["novidades"]!.AsArray(), n => Assert.Equal("2026-10-28", n!["dataPublicacao"]!.GetValue<string>()));
+
+        var primeira = _app.OpenAi.LogEntries.Select(e => e.RequestMessage?.Body ?? string.Empty).First(b => !b.Contains("json_schema", StringComparison.Ordinal));
+        Assert.Contains("29/10/2026", primeira, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Link_inventado_pelo_modelo_e_rejeitado_apos_retentativas()
     {
         Simuladores.Conversa(_app.OpenAi, "novidades-buscar_novidades", new { assunto = "CBS" }, "Veja https://www.in.gov.br/ato-que-nao-existe");
@@ -95,6 +118,49 @@ public sealed class ConversaTests(ContainersFixture containers) : IAsyncLifetime
         var id = Guid.Parse(env["execucaoId"]!.GetValue<string>());
         var consulta = await _app.NoBanco(db => db.Consultas.Include(c => c.Etapas).SingleAsync(c => c.Id == id));
         Assert.Equal(3, consulta.Etapas.Count(e => e.Etapa == EtapaFluxo.ValidacaoSaida && e.Status == StatusEtapa.Falha));
+    }
+
+    [Fact]
+    public async Task Pergunta_fora_do_ambito_tributario_recebe_a_recusa_sem_consultar_a_base()
+    {
+        Simuladores.RespostaDireta(_app.OpenAi, ResponderMensagemConversa.MensagemForaDoEscopo);
+
+        var (status, corpo) = await Enviar("conv-fora", "Quem ganhou a Copa do Mundo?");
+
+        Assert.Equal(HttpStatusCode.OK, status);
+        Assert.Equal(ResponderMensagemConversa.MensagemForaDoEscopo, corpo["mensagem"]!.GetValue<string>());
+        var env = corpo["envelope"]!;
+        Assert.Equal("concluido", env["status"]!.GetValue<string>());
+        Assert.Empty(env["limitacoes"]!.AsArray());
+        var pedido = _app.OpenAi.LogEntries.Select(e => e.RequestMessage?.Body ?? string.Empty).First(b => b.Contains("Copa do Mundo", StringComparison.Ordinal));
+        Assert.Contains("especializado em notícias de âmbito tributário", pedido, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("CBS", true)]
+    [InlineData(null, false)]
+    public async Task Busca_que_so_acha_nao_tributarias_recusa_apenas_quando_ha_assunto(string? assunto, bool recusa)
+    {
+        using (var escopo = _app.Services.CreateScope())
+        {
+            var db = escopo.ServiceProvider.GetRequiredService<AgenteDbContext>();
+            foreach (var n in await db.Novidades.ToListAsync())
+            {
+                Assert.True(n.AplicarSugestaoIa(n.Perfis, null, null, _app.Tempo.GetUtcNow(), relacionadaTributos: false).Sucesso);
+            }
+
+            await db.SaveChangesAsync();
+        }
+
+        const string doModelo = "Não foram encontradas novidades nas fontes consultadas.";
+        object argumentos = assunto is null ? new { dataInicio = "2026-10-20" } : new { assunto };
+        Simuladores.Conversa(_app.OpenAi, "novidades-buscar_novidades", argumentos, doModelo);
+
+        var (status, corpo) = await Enviar("conv-oculta", "Quais as novidades?");
+
+        Assert.Equal(HttpStatusCode.OK, status);
+        Assert.Equal(recusa ? ResponderMensagemConversa.MensagemForaDoEscopo : doModelo, corpo["mensagem"]!.GetValue<string>());
+        Assert.True(corpo["envelope"]!["resultado"]!["ocultadasNaoTributarias"]!.GetValue<int>() > 0);
     }
 
     [Fact]

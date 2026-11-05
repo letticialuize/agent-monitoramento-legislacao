@@ -28,6 +28,25 @@ public class ConsultarNovidadesTests
     }
 
     [Fact]
+    public async Task Sem_perfil_informado_consulta_o_consultor_tributario()
+    {
+        var (caso, leitura, _, _) = Montagem.Consulta();
+        await caso.ExecutarAsync(new PedidoConsulta("CBS"), Montagem.Consultor, "c", null, default);
+        Assert.Equal([Perfil.ConsultorTributario], leitura.UltimoFiltro!.Perfis);
+
+        await caso.ExecutarAsync(new PedidoConsulta("CBS", Perfis: []), Montagem.Consultor, "c", null, default);
+        Assert.Equal([Perfil.ConsultorTributario], leitura.UltimoFiltro!.Perfis);
+    }
+
+    [Fact]
+    public async Task Perfil_desenvolvedor_informado_filtra_so_desenvolvedor()
+    {
+        var (caso, leitura, _, _) = Montagem.Consulta();
+        await caso.ExecutarAsync(new PedidoConsulta("CBS", Perfis: [Perfil.Desenvolvedor]), Montagem.Consultor, "c", null, default);
+        Assert.Equal([Perfil.Desenvolvedor], leitura.UltimoFiltro!.Perfis);
+    }
+
+    [Fact]
     public async Task Fonte_com_falha_gera_falha_tecnica_e_limitacao()
     {
         var (caso, leitura, fontes, _) = Montagem.Consulta();

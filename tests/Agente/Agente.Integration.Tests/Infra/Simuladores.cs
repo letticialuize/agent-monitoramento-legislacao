@@ -134,6 +134,12 @@ public static class Simuladores
             .RespondWith(Response.Create().WithHeader("Content-Type", "application/json")
                 .WithBody(Completion("""{"classificacoes":[]}""", comUso: false)));
 
+    /// <summary>Conversa em que o modelo responde direto, sem chamar ferramentas.</summary>
+    public static void RespostaDireta(WireMockServer openAi, string resposta) =>
+        openAi.Given(Request.Create().WithPath("/v1/chat/completions").UsingPost())
+            .AtPriority(5)
+            .RespondWith(Response.Create().WithHeader("Content-Type", "application/json").WithBody(Completion(resposta)));
+
     /// <summary>Conversa: 1ª chamada pede a ferramenta; após o retorno da ferramenta, responde com <paramref name="respostaFinal"/>.</summary>
     public static void Conversa(WireMockServer openAi, string nomeFerramenta, object argumentos, string respostaFinal)
     {

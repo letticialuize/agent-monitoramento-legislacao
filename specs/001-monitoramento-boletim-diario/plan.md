@@ -40,7 +40,7 @@ implementação, sempre a última estável compatível com .NET 10.
 **Primary Dependencies**: ASP.NET Core (REST e hospedagem do agendador), Semantic Kernel
 (conector OpenAI e Function Calling), Npgsql + Entity Framework Core (PostgreSQL), MongoDB C#
 Driver (memória conversacional), MailKit (SMTP), AngleSharp (leitura de HTML), PdfPig (texto de
-PDF), JsonSchema.Net (validação de contratos JSON), OpenTelemetry (rastreamento e métricas).
+PDF), JsonSchema.Net (validação de contratos JSON), OpenTelemetry (rastreamento e métricas), Microsoft.AspNetCore.OpenApi e Swashbuckle.AspNetCore.SwaggerUI (documentação gerada do código e tela de teste manual, só em Development; alternativa descartada: manter só o contrato escrito à mão, que não testa a API rodando).
 Justificativas em [research.md](research.md).
 
 **Storage**: PostgreSQL da Api.Agente (catálogo, entes monitorados, clientes, novidades, consultas,

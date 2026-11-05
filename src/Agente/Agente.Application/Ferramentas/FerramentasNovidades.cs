@@ -66,13 +66,13 @@ public sealed class FerramentasNovidades(
         [
             new DefinicaoFerramenta(
                 BuscarNovidades,
-                "Busca novidades de legislação e jurisprudência já coletadas das fontes oficiais do catálogo, por assunto e filtros. Retorna novidades classificadas por esfera e perfil, com evidências.",
+                "Busca novidades de legislação e jurisprudência já coletadas das fontes oficiais do catálogo, por período e, opcionalmente, por assunto e filtros. Retorna novidades classificadas por esfera e perfil, com evidências.",
                 [
-                    new("assunto", "Assunto a pesquisar (2 a 200 caracteres).", "string", true),
+                    new("assunto", "Assunto a pesquisar (2 a 200 caracteres). Opcional: omita para listar todas as novidades do período.", "string", false),
                     new("dataInicio", "Início do período (AAAA-MM-DD). Opcional.", "string", false),
                     new("dataFim", "Fim do período (AAAA-MM-DD). Opcional.", "string", false),
                     new("esferas", "Lista separada por vírgula: federal, estadual, municipal. Opcional.", "string", false),
-                    new("perfis", "Lista separada por vírgula: consultor_tributario, desenvolvedor. Opcional.", "string", false),
+                    new("perfis", "consultor_tributario (padrão, quando omitido) ou desenvolvedor (área de tecnologia). Opcional.", "string", false),
                     new("grupos", "Lista separada por vírgula: legislacao_federal, legislacao_estadual, legislacao_municipal, tributos, tribunais_judiciais, administrativos_contas. Opcional.", "string", false),
                 ],
                 (args, ct) => ExecutarComControle(BuscarNovidades, usuario, consultaPai, t => Buscar(args, usuario, correlacaoId, conversaId, coletor, t), ct)),
@@ -138,7 +138,7 @@ public sealed class FerramentasNovidades(
         }
 
         var pedido = new PedidoConsulta(
-            Valor(args, "assunto") ?? throw new ArgumentException("'assunto' é obrigatório."),
+            Valor(args, "assunto") ?? string.Empty,
             Data(args, "dataInicio"),
             Data(args, "dataFim"),
             esferas.Valor,

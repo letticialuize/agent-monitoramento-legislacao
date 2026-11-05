@@ -20,7 +20,7 @@ public sealed record EnvelopeResposta(
     IReadOnlyList<string> Limitacoes,
     ResumoConsumo Consumo)
 {
-    public const string VersaoAtual = "1.0";
+    public const string VersaoAtual = "1.2";
 }
 
 public sealed record ResultadoConsulta(
@@ -31,7 +31,40 @@ public sealed record ResultadoConsulta(
     IReadOnlyList<string> FontesComFalha,
     IReadOnlyList<NovidadeDto> Novidades,
     int ItensOmitidos,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? MensagemSemNovidades);
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? MensagemSemNovidades,
+    IReadOnlyList<GrupoPerfil> Grupos,
+    int OcultadasNaoTributarias = 0);
+
+/// <summary>Novidades de um perfil. Uma novidade com dois perfis aparece nos dois grupos (FR-008, FR-011).</summary>
+public sealed record GrupoPerfil(Perfil Perfil, int Total, IReadOnlyList<GrupoEsfera> Esferas);
+
+public sealed record GrupoEsfera(Esfera Esfera, int Total, IReadOnlyList<GrupoSituacao> Situacoes);
+
+public sealed record GrupoSituacao(SituacaoNovidade Situacao, IReadOnlyList<NovidadeDto> Novidades);
+
+public static class AgrupadorNovidades
+{
+    /// <summary>Agrupa por perfil, esfera e situação; com filtro de perfil, só os perfis pedidos aparecem.</summary>
+    public static IReadOnlyList<GrupoPerfil> Agrupar(IReadOnlyList<NovidadeDto> novidades, IReadOnlyList<Perfil> filtroPerfis) =>
+        Enum.GetValues<Perfil>()
+            .Where(p => filtroPerfis.Count == 0 || filtroPerfis.Contains(p))
+            .Select(p => (Perfil: p, Itens: novidades.Where(n => n.Perfis.Contains(p)).ToList()))
+            .Where(g => g.Itens.Count > 0)
+            .Select(g => new GrupoPerfil(g.Perfil, g.Itens.Count, PorEsfera(g.Itens)))
+            .ToList();
+
+    private static List<GrupoEsfera> PorEsfera(List<NovidadeDto> itens) =>
+        itens.GroupBy(n => n.Esfera)
+            .OrderBy(g => g.Key)
+            .Select(g => new GrupoEsfera(
+                g.Key,
+                g.Count(),
+                g.GroupBy(n => n.Situacao)
+                    .OrderBy(s => s.Key)
+                    .Select(s => new GrupoSituacao(s.Key, s.ToList()))
+                    .ToList()))
+            .ToList();
+}
 
 public sealed record PeriodoDto(DateOnly Inicio, DateOnly Fim);
 
@@ -55,7 +88,8 @@ public sealed record NovidadeDto(
     RelacaoNichoDto? RelacaoNicho,
     Guid? RetificaNovidadeId,
     IReadOnlyList<EvidenciaDto> Evidencias,
-    bool RequerRevisaoHumana);
+    bool RequerRevisaoHumana,
+    bool? RelacionadaTributos = null);
 
 public sealed record RelacaoNichoDto(string Justificativa, Origem Origem);
 

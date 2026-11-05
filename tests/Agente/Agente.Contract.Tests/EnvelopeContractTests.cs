@@ -35,8 +35,9 @@ public class EnvelopeContractTests
     [Fact]
     public void Envelope_completo_e_valido()
     {
+        NovidadeDto[] novidades = [Novidade(), Novidade(SituacaoNovidade.PendenteConfirmacao, Impacto.Alto)];
         var resultado = new ResultadoConsulta("ICMS", new PeriodoDto(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 29)), null,
-            ["FED-DOU"], ["FED-DOU"], [Novidade(), Novidade(SituacaoNovidade.PendenteConfirmacao, Impacto.Alto)], 3, null);
+            ["FED-DOU"], ["FED-DOU"], novidades, 3, null, AgrupadorNovidades.Agrupar(novidades, []));
         var r = Validar(Envelope(resultado));
         Assert.True(r.IsValid, Erros(r));
     }
@@ -45,7 +46,7 @@ public class EnvelopeContractTests
     public void Envelope_sem_resultado_e_sem_novidades_e_valido()
     {
         Assert.True(Validar(Envelope(null)).IsValid);
-        var vazio = new ResultadoConsulta("x", new PeriodoDto(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 2)), null, [], [], [], 0, "Sem novidades");
+        var vazio = new ResultadoConsulta("x", new PeriodoDto(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 2)), null, [], [], [], 0, "Sem novidades", []);
         var r = Validar(Envelope(vazio));
         Assert.True(r.IsValid, Erros(r));
     }
@@ -71,7 +72,7 @@ public class EnvelopeContractTests
     public void Novidade_sem_evidencia_viola_o_contrato()
     {
         var n = Novidade() with { Evidencias = [] };
-        var resultado = new ResultadoConsulta("x", new PeriodoDto(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 2)), null, [], [], [n], 0, null);
+        var resultado = new ResultadoConsulta("x", new PeriodoDto(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 2)), null, [], [], [n], 0, null, []);
         Assert.False(Validar(Envelope(resultado)).IsValid);
     }
 }

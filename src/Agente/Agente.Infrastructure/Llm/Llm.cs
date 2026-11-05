@@ -31,7 +31,7 @@ public sealed class OpcoesLlm
 
     public float Temperatura { get; set; }
 
-    public int MaxTokensSaida { get; set; } = 2000;
+    public int MaxTokensSaida { get; set; } = 4000;
 
     public int TimeoutSegundos { get; set; } = 60;
 

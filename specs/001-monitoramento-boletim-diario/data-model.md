@@ -87,6 +87,7 @@ oficial não termine nesses sufixos exigem exceção registrada com aprovador.
 | tema | texto? | sugerido pelo LLM (indício) |
 | impacto | enum? | `alto`, `medio`, `baixo`; origem registrada |
 | perfis | lista enum | `consultor_tributario`, `desenvolvedor`; ao menos um |
+| relacionadaTributos | bool? | indício da IA; nulo se não classificada; só `false` oculta a novidade |
 | origemPerfil, origemImpacto | enum | `regra_deterministica`, `indicio_ia` |
 | situacao | enum | ver estados |
 | retificaNovidadeId | FK? | vínculo com ato original |

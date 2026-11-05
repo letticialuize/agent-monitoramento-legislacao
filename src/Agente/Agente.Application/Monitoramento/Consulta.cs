@@ -18,9 +18,10 @@ public sealed record FiltroNovidades(
     IReadOnlyList<Perfil> Perfis,
     IReadOnlyList<Grupo> Grupos,
     bool IncluirPendentes,
+    bool IncluirNaoTributarias,
     int Limite);
 
-public sealed record PaginaNovidades(IReadOnlyList<NovidadeDto> Itens, int Total);
+public sealed record PaginaNovidades(IReadOnlyList<NovidadeDto> Itens, int Total, int OcultadasNaoTributarias = 0);
 
 /// <summary>Leitura de novidades (busca textual) sem passar pelo agregado.</summary>
 public interface IConsultaNovidades
@@ -49,7 +50,8 @@ public sealed record PedidoConsulta(
     IReadOnlyList<Perfil>? Perfis = null,
     IReadOnlyList<Grupo>? Grupos = null,
     bool IncluirPendentes = true,
-    string? ClienteNome = null);
+    string? ClienteNome = null,
+    bool IncluirNaoTributarias = false);
 
 /// <summary>
 /// Consulta sob demanda por assunto (US1, FR-010..013) sobre a base coletada pelo agendador.
@@ -66,8 +68,11 @@ public sealed class ConsultarNovidades(
     IRelogio relogio,
     IOptions<OpcoesConsulta> opcoes)
 {
+    /// <summary>Consulta sem assunto: lista todas as novidades do período.</summary>
+    public const string SemAssunto = "(todas as novidades)";
+
     public const string MensagemSemNovidades =
-        "Sem novidades encontradas para o assunto nas fontes consultadas no período. Isso não significa que não houve mudança normativa: veja as fontes consultadas e as limitações.";
+        "Sem novidades encontradas nas fontes consultadas no período. Isso não significa que não houve mudança normativa: veja as fontes consultadas e as limitações.";
 
     public async Task<Resultado<EnvelopeResposta>> ExecutarAsync(
         PedidoConsulta pedido,
@@ -87,9 +92,11 @@ public sealed class ConsultarNovidades(
 
         var iniciado = relogio.AgoraUtc;
         var esferas = pedido.Esferas ?? [];
-        var perfis = pedido.Perfis ?? [];
+        // Sem perfil informado, a consulta é do consultor tributário (FR-008a).
+        IReadOnlyList<Perfil> perfis = pedido.Perfis is { Count: > 0 } informados ? informados : [Perfil.ConsultorTributario];
         var grupos = pedido.Grupos ?? [];
-        var assunto = pedido.Assunto.Trim();
+        var termo = pedido.Assunto?.Trim() ?? string.Empty;
+        var assunto = termo.Length == 0 ? SemAssunto : termo;
 
         var consulta = ConsultaAgregado.Iniciar(correlacaoId, usuario.UsuarioId, conversaId, assunto, periodo, esferas, perfis, grupos, EnvelopeResposta.VersaoAtual, iniciado);
         consultas.Adicionar(consulta);
@@ -121,7 +128,7 @@ public sealed class ConsultarNovidades(
         var etapaBusca = etapas.Iniciar(consulta, EtapaFluxo.Validacoes);
         var limite = Math.Max(1, opcoes.Value.LimiteItens);
         var pagina = await leitura.BuscarAsync(
-            new FiltroNovidades(regras.Sinonimos.Expandir(assunto), periodo.Inicio, periodo.Fim, esferas, perfis, grupos, pedido.IncluirPendentes, limite),
+            new FiltroNovidades(termo.Length == 0 ? [] : regras.Sinonimos.Expandir(termo), periodo.Inicio, periodo.Fim, esferas, perfis, grupos, pedido.IncluirPendentes, pedido.IncluirNaoTributarias, limite),
             ct);
         etapas.Concluir(etapaBusca, StatusEtapa.Sucesso, $"{pagina.Total} novidade(s) encontrada(s).");
 
@@ -133,6 +140,11 @@ public sealed class ConsultarNovidades(
         if (omitidos > 0)
         {
             limitacoes.Add($"{omitidos} novidade(s) omitida(s) pelo limite de {limite} itens; refine o assunto ou o período.");
+        }
+
+        if (pagina.OcultadasNaoTributarias > 0)
+        {
+            limitacoes.Add($"{pagina.OcultadasNaoTributarias} novidade(s) ocultada(s) por não ter(em) relação tributária, segundo indício da IA; use incluirNaoTributarias para conferir.");
         }
 
         foreach (var n in pagina.Itens.Where(n => n.OrigemPerfil == Origem.IndicioIa))
@@ -154,7 +166,7 @@ public sealed class ConsultarNovidades(
         if (pagina.Itens.Count == 0)
         {
             mensagemVazia = MensagemSemNovidades;
-            achados.Add(new Achado(CategoriaAchado.AusenciaEvidencia, "Nenhuma novidade encontrada para o assunto nas fontes consultadas.", null));
+            achados.Add(new Achado(CategoriaAchado.AusenciaEvidencia, "Nenhuma novidade encontrada nas fontes consultadas no período.", null));
         }
 
         var resultado = new ResultadoConsulta(
@@ -165,7 +177,9 @@ public sealed class ConsultarNovidades(
             fontes.ComFalha.Select(f => f.Codigo).ToList(),
             pagina.Itens,
             omitidos,
-            mensagemVazia);
+            mensagemVazia,
+            AgrupadorNovidades.Agrupar(pagina.Itens, perfis),
+            pagina.OcultadasNaoTributarias);
 
         var requerRevisao = pagina.Itens.Any(n => n.RequerRevisaoHumana);
         var status = limitacoes.Count > 0 || fontes.ComFalha.Count > 0
@@ -195,9 +209,9 @@ public sealed class ConsultarNovidades(
     {
         var erros = new List<ErroDominio>();
         var assunto = pedido.Assunto?.Trim() ?? string.Empty;
-        if (assunto.Length is < 2 or > 200)
+        if (assunto.Length is 1 or > 200)
         {
-            erros.Add(new("consulta.assunto_invalido", "O assunto deve ter entre 2 e 200 caracteres."));
+            erros.Add(new("consulta.assunto_invalido", "O assunto, quando informado, deve ter entre 2 e 200 caracteres."));
         }
 
         if (!string.IsNullOrWhiteSpace(pedido.ClienteNome))
