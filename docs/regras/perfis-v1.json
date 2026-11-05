@@ -1,0 +1,27 @@
+{
+  "versao": "perfis-v1",
+  "descricao": "Regras determinísticas de perfil (spec FR-008, constitution Princípio VIII). Configuração revisada pela equipe; não é regra fiscal.",
+  "fontesDesenvolvedor": ["TRIB-NFE", "TRIB-SPED", "TRIB-NFSE", "TRIB-ESOCIAL"],
+  "termosDesenvolvedor": [
+    "leiaute",
+    "layout",
+    "schema",
+    "xsd",
+    "nota técnica",
+    "API",
+    "webservice",
+    "web service",
+    "manual de orientação",
+    "versão do leiaute",
+    "pacote de liberação"
+  ],
+  "gruposConsultor": [
+    "legislacao_federal",
+    "legislacao_estadual",
+    "legislacao_municipal",
+    "tributos",
+    "tribunais_judiciais",
+    "administrativos_contas"
+  ],
+  "termosConsultor": []
+}

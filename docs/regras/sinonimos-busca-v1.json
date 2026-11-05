@@ -1,0 +1,28 @@
+{
+  "versao": "sinonimos-busca-v1",
+  "descricao": "Expansão de siglas e nomes na busca por assunto (research R-04). Apenas equivalências de nomenclatura; não contém regra fiscal.",
+  "grupos": [
+    ["CBS", "Contribuição sobre Bens e Serviços"],
+    ["IBS", "Imposto sobre Bens e Serviços"],
+    ["IS", "Imposto Seletivo"],
+    ["CGIBS", "Comitê Gestor do IBS", "Comitê Gestor do Imposto sobre Bens e Serviços"],
+    ["ICMS", "Imposto sobre Circulação de Mercadorias e Serviços"],
+    ["ISS", "ISSQN", "Imposto sobre Serviços"],
+    ["IPI", "Imposto sobre Produtos Industrializados"],
+    ["PIS", "Programa de Integração Social"],
+    ["Cofins", "Contribuição para o Financiamento da Seguridade Social"],
+    ["NF-e", "NFe", "Nota Fiscal Eletrônica"],
+    ["NFC-e", "NFCe", "Nota Fiscal de Consumidor Eletrônica"],
+    ["NFS-e", "NFSe", "Nota Fiscal de Serviço Eletrônica"],
+    ["CT-e", "CTe", "Conhecimento de Transporte Eletrônico"],
+    ["SPED", "Sistema Público de Escrituração Digital"],
+    ["EFD", "Escrituração Fiscal Digital"],
+    ["CONFAZ", "Conselho Nacional de Política Fazendária"],
+    ["RFB", "Receita Federal"],
+    ["PGFN", "Procuradoria-Geral da Fazenda Nacional"],
+    ["CARF", "Conselho Administrativo de Recursos Fiscais"],
+    ["Simples Nacional", "CGSN"],
+    ["Reforma Tributária", "EC 132", "LC 214"],
+    ["substituição tributária", "ICMS-ST"]
+  ]
+}

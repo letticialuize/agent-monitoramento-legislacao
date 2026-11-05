@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Domínio puro: nenhuma referência de pacote ou projeto (plan.md, "Arquitetura"). -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="Agente.Infrastructure" />
+    <InternalsVisibleTo Include="Agente.Domain.Tests" />
+  </ItemGroup>
+
+</Project>

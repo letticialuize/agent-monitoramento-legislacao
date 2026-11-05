@@ -1,0 +1,22 @@
+{
+  "versao": "esfera-por-orgao-v1",
+  "descricao": "Esfera de novidades vindas de fontes de abrangência nacional, pelo órgão emissor do item (data-model: Novidade.esfera). Regras avaliadas em ordem; padrão terminado em * casa com palavras que começam pelo prefixo.",
+  "esferaPadraoNacional": "federal",
+  "regras": [
+    { "padrao": "Município", "esfera": "municipal" },
+    { "padrao": "Prefeitura", "esfera": "municipal" },
+    { "padrao": "Câmara Municipal", "esfera": "municipal" },
+    { "padrao": "Tribunal de Justiça", "esfera": "estadual" },
+    { "padrao": "TJ*", "esfera": "estadual" },
+    { "padrao": "CONFAZ", "esfera": "estadual" },
+    { "padrao": "Conselho Nacional de Política Fazendária", "esfera": "estadual" },
+    { "padrao": "TRF*", "esfera": "federal" },
+    { "padrao": "TRT*", "esfera": "federal" },
+    { "padrao": "TRE", "esfera": "federal" },
+    { "padrao": "STF", "esfera": "federal" },
+    { "padrao": "STJ", "esfera": "federal" },
+    { "padrao": "TST", "esfera": "federal" },
+    { "padrao": "TSE", "esfera": "federal" },
+    { "padrao": "STM", "esfera": "federal" }
+  ]
+}

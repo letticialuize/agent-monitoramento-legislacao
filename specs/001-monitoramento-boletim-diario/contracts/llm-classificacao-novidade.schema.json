@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "llm-classificacao-novidade/v1",
+  "title": "Saída do LLM: sugestão de perfil, tema e impacto (v1)",
+  "description": "Chamado só para novidades que as regras determinísticas não classificaram por completo. Resultado é sempre 'indicio_ia'. Validação semântica: cada novidadeId deve existir na entrada; nenhum campo extra.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["classificacoes"],
+  "properties": {
+    "classificacoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["novidadeId", "perfis", "tema", "impacto", "justificativa"],
+        "properties": {
+          "novidadeId": { "type": "string" },
+          "perfis": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["consultor_tributario", "desenvolvedor"] } },
+          "tema": { "type": "string", "maxLength": 120 },
+          "impacto": { "enum": ["alto", "medio", "baixo"] },
+          "justificativa": { "type": "string", "maxLength": 500, "description": "Baseada apenas na ementa fornecida." }
+        }
+      }
+    }
+  }
+}

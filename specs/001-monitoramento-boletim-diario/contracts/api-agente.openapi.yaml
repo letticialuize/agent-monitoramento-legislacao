@@ -1,0 +1,281 @@
+openapi: 3.1.0
+info:
+  title: Api.Agente — Monitoramento de novidades e boletim diário
+  version: 1.0.0
+  description: >
+    Contrato REST da feature 001. Todas as respostas de consulta usam o envelope
+    envelope-resposta.schema.json (v1). Sem autenticação por enquanto (desvio temporário, ADR 0007); x-papeis
+    indica os papéis previstos para quando ela voltar. Cabeçalho opcional X-Correlation-Id é propagado; se ausente,
+    o sistema gera um.
+paths:
+  /api/v1/consultas:
+    post:
+      summary: Consulta sob demanda por assunto (US1) e opcionalmente por cliente (US3)
+      x-papeis: [consultor, desenvolvedor]
+      x-requisitos: [FR-010, FR-011, FR-012, FR-013, FR-014, FR-015, FR-017]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ConsultaRequest' }
+      responses:
+        '200':
+          description: Consulta executada (inclusive com limitações ou sem novidades)
+          content:
+            application/json:
+              schema: { $ref: 'envelope-resposta.schema.json' }
+        '400': { $ref: '#/components/responses/Validacao' }
+        '404': { description: Cliente não cadastrado }
+  /api/v1/conversas/{conversaId}/mensagens:
+    post:
+      summary: Mensagem em linguagem natural ao agente (usa ferramentas de contracts/ferramentas.md)
+      x-papeis: [consultor, desenvolvedor]
+      parameters:
+        - { name: conversaId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [texto]
+              properties:
+                texto: { type: string, maxLength: 4000 }
+      responses:
+        '200':
+          description: Resposta do agente com envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [mensagem, envelope]
+                properties:
+                  mensagem: { type: string }
+                  envelope: { $ref: 'envelope-resposta.schema.json' }
+  /api/v1/novidades/pendentes:
+    get:
+      summary: Fila de revisão humana (US4)
+      x-papeis: [revisor]
+      parameters:
+        - { name: situacao, in: query, schema: { enum: [pendente_confirmacao, fonte_nao_catalogada, em_analise] } }
+      responses:
+        '200': { description: Lista de novidades pendentes no formato 'novidade' do envelope }
+  /api/v1/novidades/{novidadeId}/revisao:
+    post:
+      summary: Decisão de revisão humana (US4)
+      x-papeis: [revisor]
+      x-requisitos: [FR-027, FR-028]
+      parameters:
+        - { name: novidadeId, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [decisao, motivo]
+              properties:
+                decisao: { enum: [confirmar, descartar, em_analise] }
+                motivo: { type: string, minLength: 3 }
+                linkOficial: { type: string, format: uri, description: Obrigatório quando decisao = confirmar; deve pertencer a fonte oficial do catálogo }
+      responses:
+        '204': { description: Decisão registrada }
+        '400': { $ref: '#/components/responses/Validacao' }
+        '409': { description: Novidade não está em estado revisável }
+  /api/v1/boletins/{diaReferenciaFim}:
+    get:
+      summary: Consulta um boletim gerado e seu status de envio
+      x-papeis: [administrador, revisor]
+      parameters:
+        - { name: diaReferenciaFim, in: path, required: true, schema: { type: string, format: date } }
+      responses:
+        '200': { description: Boletim, itens e status por destinatário }
+        '404': { description: Boletim não gerado }
+  /api/v1/boletins/{diaReferenciaFim}/envio:
+    post:
+      summary: Dispara (ou retoma) o envio de forma idempotente (FR-020)
+      x-papeis: [administrador]
+      parameters:
+        - { name: diaReferenciaFim, in: path, required: true, schema: { type: string, format: date } }
+      responses:
+        '202': { description: Envio iniciado ou retomado só para destinatários pendentes/com falha }
+        '200': { description: Boletim já enviado a todos; nada foi reenviado }
+  /api/v1/admin/catalogo/versoes:
+    post:
+      summary: Carrega nova versão do catálogo de fontes (US5, FR-029)
+      x-papeis: [administrador]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [versao, documentoOrigem, fontes]
+              properties:
+                versao: { type: string }
+                documentoOrigem: { type: string }
+                fontes: { type: array, items: { $ref: '#/components/schemas/FonteInput' } }
+      responses:
+        '201': { description: Versão criada (não vigente até ativação) }
+        '400': { $ref: '#/components/responses/Validacao' }
+  /api/v1/admin/catalogo/versoes/{versao}/ativacao:
+    post:
+      summary: Ativa a versão do catálogo
+      x-papeis: [administrador]
+      parameters:
+        - { name: versao, in: path, required: true, schema: { type: string } }
+      responses:
+        '204': { description: Versão vigente alterada }
+  /api/v1/admin/entes-monitorados:
+    get: { summary: Lista UFs e municípios monitorados, x-papeis: [administrador], responses: { '200': { description: OK } } }
+    post:
+      summary: Inclui UF ou município (FR-035)
+      x-papeis: [administrador]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [tipo, uf]
+              properties:
+                tipo: { enum: [uf, municipio] }
+                uf: { type: string, pattern: '^[A-Z]{2}$' }
+                municipio: { type: string }
+      responses:
+        '201': { description: Incluído (inativo até ter fontes ativas) }
+  /api/v1/admin/clientes:
+    get: { summary: Lista clientes, x-papeis: [administrador, consultor], responses: { '200': { description: OK } } }
+    post:
+      summary: Cadastra cliente (somente nome e nicho)
+      x-papeis: [administrador]
+      x-requisitos: [FR-015, FR-016, FR-031]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClienteInput' }
+      responses:
+        '201': { description: Criado }
+        '400': { $ref: '#/components/responses/Validacao' }
+  /api/v1/admin/destinatarios:
+    get: { summary: Lista destinatários do boletim, x-papeis: [administrador], responses: { '200': { description: OK } } }
+    post:
+      summary: Inclui destinatário
+      x-papeis: [administrador]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [nome, email]
+              properties:
+                nome: { type: string }
+                email: { type: string, format: email }
+      responses:
+        '201': { description: Criado }
+  /api/v1/admin/destinatarios/{id}:
+    patch:
+      summary: Ativa ou desativa destinatário
+      x-papeis: [administrador]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ativo]
+              properties:
+                ativo: { type: boolean }
+      responses:
+        '204': { description: Atualizado }
+  /api/v1/admin/feriados:
+    post:
+      summary: Carrega feriados nacionais de um ano
+      x-papeis: [administrador]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [ano, fonteInformada, feriados]
+              properties:
+                ano: { type: integer }
+                fonteInformada: { type: string }
+                feriados:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [data, descricao]
+                    properties:
+                      data: { type: string, format: date }
+                      descricao: { type: string }
+      responses:
+        '201': { description: Carregado }
+components:
+  responses:
+    Validacao:
+      description: Erro de validação de entrada (problem+json com lista de campos)
+      content:
+        application/problem+json:
+          schema:
+            type: object
+            properties:
+              title: { type: string }
+              errors: { type: object, additionalProperties: { type: array, items: { type: string } } }
+  schemas:
+    ConsultaRequest:
+      type: object
+      additionalProperties: false
+      required: [assunto]
+      properties:
+        assunto: { type: string, minLength: 2, maxLength: 200 }
+        periodo:
+          type: object
+          additionalProperties: false
+          properties:
+            inicio: { type: string, format: date }
+            fim: { type: string, format: date }
+          description: Padrão — últimos 7 dias corridos
+        esferas: { type: array, items: { enum: [federal, estadual, municipal] } }
+        perfis: { type: array, items: { enum: [consultor_tributario, desenvolvedor] } }
+        grupos: { type: array, items: { enum: [legislacao_federal, legislacao_estadual, legislacao_municipal, tributos, tribunais_judiciais, administrativos_contas] } }
+        incluirPendentes: { type: boolean, default: true }
+        clienteNome: { type: string, description: Nome de cliente cadastrado; nenhum outro dado de cliente é aceito }
+    ClienteInput:
+      type: object
+      additionalProperties: false
+      required: [nome, nicho]
+      properties:
+        nome: { type: string, minLength: 2, maxLength: 200 }
+        nicho: { enum: [varejo_mercadorias, produtos_farmaceuticos, tributacao_padrao] }
+    FonteInput:
+      type: object
+      additionalProperties: false
+      required: [codigo, nome, linkOficial, oQueMonitorar, orgaoEmissor, esfera, grupo, natureza, responsavelInterno, formatos, tipoConector, periodicidade]
+      properties:
+        codigo: { type: string }
+        nome: { type: string }
+        linkOficial: { type: string, format: uri }
+        oQueMonitorar: { type: string }
+        orgaoEmissor: { type: string }
+        esfera: { enum: [federal, estadual, municipal, nacional] }
+        ente: { type: string }
+        grupo: { enum: [legislacao_federal, legislacao_estadual, legislacao_municipal, tributos, tribunais_judiciais, administrativos_contas] }
+        natureza: { enum: [oficial, agregador_apoio] }
+        responsavelInterno: { type: array, items: { enum: [AJ, AF, CC, TI] } }
+        formatos: { type: array, items: { enum: [html, pdf, xml, json, xsd] } }
+        tipoConector: { enum: [Inlabs, SenadoDadosAbertos, CamaraDadosAbertos, LexmlOaiPmh, Djen, QueridoDiario, PaginaOficial] }
+        configuracaoConector: { type: object }
+        periodicidade: { enum: [diaria_dias_uteis, diaria, semanal, quinzenal, trimestral] }

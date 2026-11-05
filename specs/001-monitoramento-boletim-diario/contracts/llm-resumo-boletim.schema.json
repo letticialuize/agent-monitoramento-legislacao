@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "llm-resumo-boletim/v1",
+  "title": "Saída do LLM: resumo executivo do boletim (v1)",
+  "description": "Entrada: novidades confirmadas do boletim (id, esfera, perfis, ementa, órgão, ato). Validação semântica: todo id citado em destaques existe na entrada; o texto não contém URLs; nenhum ato fora da entrada é mencionado. Em falha após retentativas, o boletim é enviado sem resumo.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["resumo", "destaques"],
+  "properties": {
+    "resumo": { "type": "string", "maxLength": 1200 },
+    "destaques": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["novidadeId", "motivo"],
+        "properties": {
+          "novidadeId": { "type": "string" },
+          "motivo": { "type": "string", "maxLength": 300 }
+        }
+      }
+    }
+  }
+}

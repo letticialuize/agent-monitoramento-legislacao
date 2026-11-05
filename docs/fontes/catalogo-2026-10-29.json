@@ -1,0 +1,231 @@
+{
+  "versao": "2026-10-29",
+  "documentoOrigem": "docs/fontes/catalogo-fontes-confiaveis-2026-10-29.pdf",
+  "observacoes": [
+    "Transcrição das fontes federais e nacionais do PDF. Links extraídos das anotações do PDF.",
+    "Fontes-modelo com <UF>, <Municipio> ou <órgão> (DOE, ALE, PGE, DOM, Câmara Municipal, PGM, SEFAZ, fazendas municipais, TJs, TRTs, conselhos estaduais/municipais, TCE/TCM, reguladores) não são instanciadas: dependem das listas de entes monitorados (DP-25).",
+    "Campo 'tipoConector' e 'configuracaoConector' vêm do research.md (R-03), não do PDF.",
+    "A tabela de periodicidade do PDF cobre grupos de fontes; fontes não citadas nela estão em 'pendencias'."
+  ],
+  "pendencias": [
+    { "codigos": ["FED-PLANALTO", "FED-SENADO", "FED-CAMARA", "FED-LEXML"], "campo": "periodicidade", "descricao": "Não definida na tabela do catálogo; adotada 'diaria_dias_uteis' (mesma do DOU) até definição." },
+    { "codigos": ["TRIB-PGFN", "TRIB-CGSN", "TRIB-MF-CBS", "TRIB-NFE", "TRIB-SPED", "TRIB-NFSE", "TRIB-ESOCIAL"], "campo": "periodicidade", "descricao": "Tabela cita 'Normas tributárias (RFB, CONFAZ, SEFAZ, CGIBS)' como diária; estas fontes não são citadas. Adotada 'diaria' até definição." },
+    { "codigos": ["JUD-TSE", "ADM-CGIBS"], "campo": "periodicidade", "descricao": "Não citadas na tabela; adotada 'semanal' (mesma de precedentes e conselhos) até definição." },
+    { "codigos": ["TRIB-CGIBS", "ADM-CGIBS"], "campo": "esfera", "descricao": "Órgão com estados, DF e municípios; sem regra de esfera definida (aplica-se a esfera padrão com limitação registrada)." },
+    { "codigos": ["FED-DOU"], "campo": "conector", "descricao": "INLABS em manutenção e sem dicionário oficial dos campos do XML; conector bloqueado até confirmação (Princípio II)." },
+    { "codigos": ["FED-LEXML"], "campo": "conector", "descricao": "Endpoint OAI-PMH público não confirmado (503/404 em 2026-10-29); conector bloqueado." },
+    { "codigos": ["DATAJUD"], "campo": "fonte", "descricao": "DataJud (metadados processuais) fora do escopo da feature 001 (research R-03); não importado." },
+    { "codigos": ["FED-PLANALTO"], "campo": "configuracaoConector", "descricao": "Sem configuração: conexão encerrada pelo site em acessos automatizados (2026-11-03). Gera falha_tecnica até haver acesso." },
+    { "codigos": ["JUD-STJ"], "campo": "configuracaoConector", "descricao": "Sem configuração: portal responde HTTP 400 a acessos automatizados (2026-11-03). Gera falha_tecnica." },
+    { "codigos": ["JUD-TSE"], "campo": "configuracaoConector", "descricao": "Sem configuração: site responde HTTP 403 a acessos automatizados (2026-11-03); o bloqueio não foi contornado. Gera falha_tecnica." },
+    { "codigos": ["TRIB-CGSN"], "campo": "configuracaoConector", "descricao": "Sem configuração: página de resoluções não traz listagem no HTML (2026-11-03). Gera falha_tecnica." },
+    { "codigos": ["JUD-BNP"], "campo": "configuracaoConector", "descricao": "Sem configuração: aplicação que carrega os dados por JavaScript, sem API documentada localizada (2026-11-03). Gera falha_tecnica." },
+    { "codigos": ["ADM-CGIBS"], "campo": "configuracaoConector", "descricao": "Sem configuração: contencioso do IBS ainda sem página de decisões; revisar quando instalado." },
+    { "codigos": ["TRIB-RFB"], "campo": "cobertura", "descricao": "Sistema Normas é carregado por JavaScript. Configurada a página oficial de notícias da RFB: instruções normativas, ADIs e Soluções de Consulta só entram quando noticiadas." },
+    { "codigos": ["TRIB-PGFN", "TRIB-MF-CBS", "JUD-STF", "JUD-TST", "JUD-CJF", "CONTAS-TCU", "TRIB-ESOCIAL", "TRIB-NFSE"], "campo": "cobertura", "descricao": "Configurada a listagem de notícias oficiais do órgão; não cobre integralmente o campo 'oQueMonitorar' (ex.: súmulas, informativos, acórdãos, pareceres, documentação técnica)." },
+    { "codigos": ["TRIB-CGIBS"], "campo": "cobertura", "descricao": "Configuradas resoluções e portarias; notícias, comunicados e documentos técnicos não têm data no HTML." },
+    { "codigos": ["JUD-DJEN", "AGR-QUERIDO-DIARIO"], "campo": "configuracaoConector", "descricao": "Exige filtros (tribunais e texto no DJEN; territórios IBGE e termos no Querido Diário) a definir pela equipe. Sem eles, gera falha_tecnica." }
+  ],
+  "fontes": [
+    {
+      "codigo": "FED-DOU", "nome": "Diário Oficial da União – DOU", "linkOficial": "https://www.in.gov.br/",
+      "oQueMonitorar": "Leis, MPs, decretos, portarias, instruções normativas, resoluções (Seções 1, 2 e 3)",
+      "orgaoEmissor": "Imprensa Nacional / Presidência da República", "esfera": "federal", "grupo": "legislacao_federal",
+      "natureza": "oficial", "responsavelInterno": ["AJ", "TI"], "formatos": ["html", "pdf", "xml"],
+      "tipoConector": "Inlabs", "periodicidade": "diaria_dias_uteis"
+    },
+    {
+      "codigo": "FED-PLANALTO", "nome": "Portal da Legislação – Planalto", "linkOficial": "https://www.planalto.gov.br/legislacao",
+      "oQueMonitorar": "Texto compilado de CF, leis, LCs, MPs e decretos",
+      "orgaoEmissor": "Casa Civil da Presidência", "esfera": "federal", "grupo": "legislacao_federal",
+      "natureza": "oficial", "responsavelInterno": ["AJ"], "formatos": ["html"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria_dias_uteis"
+    },
+    {
+      "codigo": "FED-SENADO", "nome": "Legislação do Senado (Normas) e Dados Abertos do Senado", "linkOficial": "https://legis.senado.leg.br/",
+      "oQueMonitorar": "Normas federais com vigência e alterações; tramitação de projetos",
+      "orgaoEmissor": "Senado Federal", "esfera": "federal", "grupo": "legislacao_federal",
+      "natureza": "oficial", "responsavelInterno": ["AJ", "TI"], "formatos": ["html", "xml", "json"],
+      "tipoConector": "SenadoDadosAbertos", "periodicidade": "diaria_dias_uteis",
+      "configuracaoConector": { "baseUrl": "https://legis.senado.leg.br/dadosabertos", "maxNormasPorDia": 50 }
+    },
+    {
+      "codigo": "FED-CAMARA", "nome": "Câmara dos Deputados – Legislação e Dados Abertos", "linkOficial": "https://www.camara.leg.br/legislacao",
+      "oQueMonitorar": "Projetos de lei, PECs, PLPs em tramitação e normas aprovadas",
+      "orgaoEmissor": "Câmara dos Deputados", "esfera": "federal", "grupo": "legislacao_federal",
+      "natureza": "oficial", "responsavelInterno": ["AJ", "TI"], "formatos": ["html", "json", "xml"],
+      "tipoConector": "CamaraDadosAbertos", "periodicidade": "diaria_dias_uteis",
+      "configuracaoConector": { "baseUrl": "https://dadosabertos.camara.leg.br/api/v2", "siglasTipo": ["PL", "PLP", "PEC", "MPV"], "itensPorPagina": 100, "maxPaginas": 5 }
+    },
+    {
+      "codigo": "FED-LEXML", "nome": "LexML Brasil", "linkOficial": "https://www.lexml.gov.br/",
+      "oQueMonitorar": "Busca unificada de legislação e jurisprudência das três esferas (URN LEX)",
+      "orgaoEmissor": "Senado Federal (rede LexML)", "esfera": "nacional", "grupo": "legislacao_federal",
+      "natureza": "oficial", "responsavelInterno": ["TI", "AJ"], "formatos": ["html", "xml"],
+      "tipoConector": "LexmlOaiPmh", "periodicidade": "diaria_dias_uteis"
+    },
+    {
+      "codigo": "AGR-QUERIDO-DIARIO", "nome": "Querido Diário", "linkOficial": "https://queridodiario.ok.org.br/",
+      "oQueMonitorar": "Busca textual em diários oficiais municipais (cobertura parcial); apoio de busca, confirmar no DOM original",
+      "orgaoEmissor": "Open Knowledge Brasil (agregador de dados públicos)", "esfera": "nacional", "grupo": "legislacao_municipal",
+      "natureza": "agregador_apoio", "responsavelInterno": ["TI", "AJ"], "formatos": ["html", "json"],
+      "tipoConector": "QueridoDiario", "periodicidade": "diaria_dias_uteis",
+      "configuracaoConector": { "baseUrl": "https://api.queridodiario.org.br", "territoryIds": [], "querystring": "", "size": 50 }
+    },
+    {
+      "codigo": "TRIB-RFB", "nome": "Receita Federal – Sistema Normas", "linkOficial": "https://normas.receita.fazenda.gov.br/",
+      "oQueMonitorar": "Instruções normativas, ADIs, Soluções de Consulta COSIT e Soluções de Divergência",
+      "orgaoEmissor": "Receita Federal do Brasil (RFB)", "esfera": "federal", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria",
+      "configuracaoConector": {"urlListagem":"https://www.gov.br/receitafederal/pt-br/assuntos/noticias/{ano}","seletorItem":"div.conteudo","seletorTitulo":"h2.titulo","seletorLink":"h2.titulo a","seletorData":".data","seletorDescricao":".descricao","tipoAto":"Notícia"}
+    },
+    {
+      "codigo": "TRIB-PGFN", "nome": "PGFN", "linkOficial": "https://www.gov.br/pgfn",
+      "oQueMonitorar": "Pareceres, lista de dispensa de contestar e recorrer, editais de transação",
+      "orgaoEmissor": "Procuradoria-Geral da Fazenda Nacional", "esfera": "federal", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF", "AJ"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria",
+      "configuracaoConector": {"urlListagem":"https://www.gov.br/pgfn/pt-br/assuntos/noticias","seletorItem":"div.conteudo","seletorTitulo":"h2.titulo","seletorLink":"h2.titulo a","seletorData":".data","seletorDescricao":".descricao","tipoAto":"Notícia"}
+    },
+    {
+      "codigo": "TRIB-CGSN", "nome": "Simples Nacional – CGSN", "linkOficial": "https://www8.receita.fazenda.gov.br/simplesnacional",
+      "oQueMonitorar": "Resoluções CGSN e atualizações do regime",
+      "orgaoEmissor": "Comitê Gestor do Simples Nacional", "esfera": "federal", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria"
+    },
+    {
+      "codigo": "TRIB-CGIBS", "nome": "Comitê Gestor do IBS – CGIBS", "linkOficial": "https://www.cgibs.gov.br/",
+      "oQueMonitorar": "Regulamento do IBS, resoluções, notas técnicas, atos conjuntos com a União",
+      "orgaoEmissor": "CGIBS (estados, DF e municípios)", "esfera": "nacional", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria",
+      "configuracaoConector": {"listagens":[{"urlListagem":"https://www.cgibs.gov.br/resolucoes","seletorItem":"div.panel.panel-default","seletorTitulo":".panel-title","seletorLink":".panel-body a[href]","seletorDescricao":".panel-body strong","padraoData":"em (?<data>\\d{2}/\\d{2}/\\d{4})","padraoNumero":"N[º°]\\s*(?<numero>\\d+(?:/\\d+)?)","tipoAto":"Resolução CGIBS"},{"urlListagem":"https://www.cgibs.gov.br/portarias","seletorItem":"div.panel.panel-default","seletorTitulo":".panel-title","seletorLink":".panel-body a[href]","seletorDescricao":".panel-body strong","padraoData":"em (?<data>\\d{2}/\\d{2}/\\d{4})","padraoNumero":"N[º°]\\s*(?<numero>\\d+(?:/\\d+)?)","tipoAto":"Portaria CGIBS"}]}
+    },
+    {
+      "codigo": "TRIB-MF-CBS", "nome": "Ministério da Fazenda – Reforma Tributária e RFB (regulamento da CBS)", "linkOficial": "https://www.gov.br/fazenda",
+      "oQueMonitorar": "Regulamento da CBS, Imposto Seletivo, cronograma de transição",
+      "orgaoEmissor": "Ministério da Fazenda / RFB", "esfera": "federal", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria",
+      "configuracaoConector": {"urlListagem":"https://www.gov.br/fazenda/pt-br/assuntos/noticias/{ano}","seletorItem":"div.conteudo","seletorTitulo":"h2.titulo","seletorLink":"h2.titulo a","seletorData":".data","seletorDescricao":".descricao","tipoAto":"Notícia"}
+    },
+    {
+      "codigo": "TRIB-CONFAZ", "nome": "CONFAZ", "linkOficial": "https://www.confaz.fazenda.gov.br/",
+      "oQueMonitorar": "Convênios e protocolos ICMS, Ajustes SINIEF, Atos COTEPE",
+      "orgaoEmissor": "Conselho Nacional de Política Fazendária", "esfera": "nacional", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria",
+      "configuracaoConector": {"listagens":[{"urlListagem":"https://www.confaz.fazenda.gov.br/legislacao/convenios/{ano}","seletorItem":"li[class*=\"section-cv\"]","seletorTitulo":"a span","seletorLink":"a","atributoEmenta":"title","dataNoDetalhe":true,"seletorData":".A2DataPublicacao","padraoData":"DOU de (?<data>\\d{2}\\.\\d{2}\\.\\d{2})","formatosData":["dd.MM.yy"],"maxItens":15,"padraoNumero":"(?<numero>\\d+/\\d+)","tipoAto":"Convênio ICMS"},{"urlListagem":"https://www.confaz.fazenda.gov.br/legislacao/protocolos/{ano}","seletorItem":"li[class*=\"section-pt\"]","seletorTitulo":"a span","seletorLink":"a","atributoEmenta":"title","dataNoDetalhe":true,"seletorData":".A2DataPublicacao","padraoData":"DOU de (?<data>\\d{2}\\.\\d{2}\\.\\d{2})","formatosData":["dd.MM.yy"],"maxItens":15,"padraoNumero":"(?<numero>\\d+/\\d+)","tipoAto":"Protocolo ICMS"},{"urlListagem":"https://www.confaz.fazenda.gov.br/legislacao/atos/{ano}","seletorItem":"li[class*=\"section-ac\"]","seletorTitulo":"a span","seletorLink":"a","atributoEmenta":"title","dataNoDetalhe":true,"seletorData":".A2DataPublicacao","padraoData":"DOU de (?<data>\\d{2}\\.\\d{2}\\.\\d{2})","formatosData":["dd.MM.yy"],"maxItens":15,"padraoNumero":"(?<numero>\\d+/\\d+)","tipoAto":"Ato COTEPE/ICMS"},{"urlListagem":"https://www.confaz.fazenda.gov.br/legislacao/ajustes/{ano}/{ano}","seletorItem":"li[class*=\"section-aj\"]","seletorTitulo":"a span","seletorLink":"a","atributoEmenta":"title","dataNoDetalhe":true,"seletorData":".A2DataPublicacao","padraoData":"DOU de (?<data>\\d{2}\\.\\d{2}\\.\\d{2})","formatosData":["dd.MM.yy"],"maxItens":15,"padraoNumero":"(?<numero>\\d+/\\d+)","tipoAto":"Ajuste SINIEF"}]}
+    },
+    {
+      "codigo": "TRIB-NFE", "nome": "Portal Nacional da NF-e", "linkOficial": "https://www.nfe.fazenda.gov.br/",
+      "oQueMonitorar": "Notas técnicas, leiautes, schemas XML e manuais de obrigações acessórias",
+      "orgaoEmissor": "ENCAT / RFB / Comitê Gestor da NFS-e", "esfera": "federal", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF", "TI"], "formatos": ["html", "pdf", "xsd", "xml"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria",
+      "configuracaoConector": {"listagens":[{"urlListagem":"https://www.nfe.fazenda.gov.br/portal/listaConteudo.aspx?tipoConteudo=04BIflQt1aY=","seletorItem":"p","seletorTitulo":".tituloConteudo","ementaTextoDoItem":true,"padraoData":"Publicada em (?<data>\\d{2}/\\d{2}/\\d{4})","padraoNumero":"Nota Técnica (?<numero>[\\d.]+\\s*v[\\d.]+)","tipoAto":"Nota Técnica"},{"urlListagem":"https://www.nfe.fazenda.gov.br/portal/principal.aspx","seletorItem":"#ctl00_ContentPlaceHolder1_gdvInformes tr","seletorTitulo":".linkInformes","seletorLink":".linkInformes","tipoAto":"Informe"}]}
+    },
+    {
+      "codigo": "TRIB-SPED", "nome": "Portal do SPED", "linkOficial": "http://sped.rfb.gov.br/",
+      "oQueMonitorar": "Notas técnicas, leiautes, schemas XML e manuais de obrigações acessórias",
+      "orgaoEmissor": "ENCAT / RFB / Comitê Gestor da NFS-e", "esfera": "federal", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF", "TI"], "formatos": ["html", "pdf", "xsd", "xml"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria",
+      "configuracaoConector": {"urlListagem":"http://sped.rfb.gov.br/","seletorItem":"section.destaque","seletorTitulo":"h2","seletorLink":"h2 a","seletorData":".data","seletorDescricao":"p:not(.data)","tipoAto":"Comunicado"}
+    },
+    {
+      "codigo": "TRIB-NFSE", "nome": "NFS-e Nacional", "linkOficial": "https://www.gov.br/nfse",
+      "oQueMonitorar": "Notas técnicas, leiautes, schemas XML e manuais de obrigações acessórias",
+      "orgaoEmissor": "ENCAT / RFB / Comitê Gestor da NFS-e", "esfera": "federal", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF", "TI"], "formatos": ["html", "pdf", "xsd", "xml"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria",
+      "configuracaoConector": {"urlListagem":"https://www.gov.br/nfse/pt-br/noticias","seletorItem":"div.conteudo","seletorTitulo":"h2.titulo","seletorLink":"h2.titulo a","seletorData":".data","seletorDescricao":".descricao","tipoAto":"Notícia"}
+    },
+    {
+      "codigo": "TRIB-ESOCIAL", "nome": "eSocial", "linkOficial": "https://www.gov.br/esocial",
+      "oQueMonitorar": "Leiautes, notas técnicas e manual de orientação",
+      "orgaoEmissor": "Governo Federal (RFB, MTE, INSS)", "esfera": "federal", "grupo": "tributos",
+      "natureza": "oficial", "responsavelInterno": ["AF", "TI"], "formatos": ["html", "pdf", "xsd"],
+      "tipoConector": "PaginaOficial", "periodicidade": "diaria",
+      "configuracaoConector": {"urlListagem":"https://www.gov.br/esocial/pt-br/noticias/colecao-TODAS-NOTICIAS","seletorItem":"article.tileItem, div.tileItem","seletorTitulo":"h2.tileHeadline","seletorLink":"h2.tileHeadline a","seletorData":".summary-view-icon","seletorDescricao":".description","tipoAto":"Notícia"}
+    },
+    {
+      "codigo": "JUD-DJEN", "nome": "DJEN – Diário de Justiça Eletrônico Nacional", "linkOficial": "https://comunica.pje.jus.br/",
+      "oQueMonitorar": "Publicações e intimações de atos judiciais de todos os tribunais aderentes",
+      "orgaoEmissor": "Conselho Nacional de Justiça (CNJ)", "esfera": "nacional", "grupo": "tribunais_judiciais",
+      "natureza": "oficial", "responsavelInterno": ["AJ", "TI"], "formatos": ["html", "json"],
+      "tipoConector": "Djen", "periodicidade": "diaria_dias_uteis",
+      "configuracaoConector": { "baseUrl": "https://comunicaapi.pje.jus.br/api/v1", "tribunais": [], "texto": "", "itensPorPagina": 100, "maxPaginas": 5 }
+    },
+    {
+      "codigo": "JUD-BNP", "nome": "Banco Nacional de Precedentes – BNP", "linkOficial": "https://pangeabnp.pdpj.jus.br/",
+      "oQueMonitorar": "Temas de repercussão geral, repetitivos, IRDR, IAC e súmulas de todos os tribunais",
+      "orgaoEmissor": "CNJ", "esfera": "nacional", "grupo": "tribunais_judiciais",
+      "natureza": "oficial", "responsavelInterno": ["AJ"], "formatos": ["html"],
+      "tipoConector": "PaginaOficial", "periodicidade": "semanal"
+    },
+    {
+      "codigo": "JUD-STF", "nome": "STF – Jurisprudência", "linkOficial": "https://portal.stf.jus.br/",
+      "oQueMonitorar": "Repercussão geral, súmulas vinculantes, ADI/ADC/ADPF, Informativo STF",
+      "orgaoEmissor": "Supremo Tribunal Federal", "esfera": "federal", "grupo": "tribunais_judiciais",
+      "natureza": "oficial", "responsavelInterno": ["AJ"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "semanal",
+      "configuracaoConector": {"urlListagem":"https://noticias.stf.jus.br/","seletorItem":"div.card-xs.noticia","seletorTitulo":".noticia-titulo","seletorLink":".noticia-titulo a","seletorData":".noticia-compartilhar .noticia-data","seletorDescricao":".noticia-resumo","tipoAto":"Notícia"}
+    },
+    {
+      "codigo": "JUD-STJ", "nome": "STJ – Jurisprudência", "linkOficial": "https://www.stj.jus.br/",
+      "oQueMonitorar": "Recursos repetitivos, súmulas, Informativo de Jurisprudência, Jurisprudência em Teses",
+      "orgaoEmissor": "Superior Tribunal de Justiça", "esfera": "federal", "grupo": "tribunais_judiciais",
+      "natureza": "oficial", "responsavelInterno": ["AJ", "AF"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "semanal"
+    },
+    {
+      "codigo": "JUD-TST", "nome": "TST – Jurisprudência", "linkOficial": "https://www.tst.jus.br/",
+      "oQueMonitorar": "Súmulas, OJs, IRR (repetitivos trabalhistas), informativos",
+      "orgaoEmissor": "Tribunal Superior do Trabalho", "esfera": "federal", "grupo": "tribunais_judiciais",
+      "natureza": "oficial", "responsavelInterno": ["AJ"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "semanal",
+      "configuracaoConector": {"urlListagem":"https://www.tst.jus.br/noticias","seletorItem":"div.asset-abstract","seletorTitulo":"h3.asset-title","seletorLink":"h3.asset-title a","seletorData":".metadata-publish-date","seletorDescricao":".asset-summary p","tipoAto":"Notícia"}
+    },
+    {
+      "codigo": "JUD-TSE", "nome": "TSE", "linkOficial": "https://www.tse.jus.br/",
+      "oQueMonitorar": "Resoluções e jurisprudência eleitoral (quando aplicável ao cliente)",
+      "orgaoEmissor": "Tribunal Superior Eleitoral", "esfera": "federal", "grupo": "tribunais_judiciais",
+      "natureza": "oficial", "responsavelInterno": ["AJ"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "semanal"
+    },
+    {
+      "codigo": "JUD-CJF", "nome": "CJF – Pesquisa unificada e TRFs da 1ª à 6ª Região", "linkOficial": "https://www.cjf.jus.br/",
+      "oQueMonitorar": "Jurisprudência federal, IRDRs, enunciados, matéria tributária federal",
+      "orgaoEmissor": "Conselho da Justiça Federal / TRFs", "esfera": "federal", "grupo": "tribunais_judiciais",
+      "natureza": "oficial", "responsavelInterno": ["AJ", "AF"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "semanal",
+      "configuracaoConector": {"urlListagem":"https://www.cjf.jus.br/cjf/noticias","seletorItem":"article.tileItem, div.tileItem","seletorTitulo":"h2.tileHeadline","seletorLink":"h2.tileHeadline a","seletorData":".summary-view-icon","seletorDescricao":".description","tipoAto":"Notícia"}
+    },
+    {
+      "codigo": "ADM-CARF", "nome": "CARF e pesquisa de acórdãos", "linkOficial": "https://www.gov.br/carf",
+      "oQueMonitorar": "Acórdãos da CSRF, súmulas CARF, pautas de julgamento",
+      "orgaoEmissor": "Conselho Administrativo de Recursos Fiscais", "esfera": "federal", "grupo": "administrativos_contas",
+      "natureza": "oficial", "responsavelInterno": ["AF"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "semanal",
+      "configuracaoConector": {"hostsPermitidos":["acordaos.economia.gov.br"],"listagens":[{"urlListagem":"https://www.gov.br/carf/pt-br/assuntos/novas-noticias","seletorItem":"div.conteudo","seletorTitulo":"h2.titulo","seletorLink":"h2.titulo a","seletorData":".data","seletorDescricao":".descricao","tipoAto":"Notícia"},{"urlListagem":"https://www.gov.br/carf/pt-br/assuntos/avisos-comunicados/{ano}","seletorItem":"table tr","seletorTitulo":"td:nth-child(2) strong, td:nth-child(2) b","seletorLink":"td:nth-child(2) a[href]","linkDaListagem":true,"seletorData":"td:first-child","tipoAto":"Aviso"}]}
+    },
+    {
+      "codigo": "ADM-CGIBS", "nome": "CGIBS – instâncias de julgamento do IBS", "linkOficial": "https://www.cgibs.gov.br/",
+      "oQueMonitorar": "Decisões do contencioso administrativo do IBS, quando instalado",
+      "orgaoEmissor": "CGIBS", "esfera": "nacional", "grupo": "administrativos_contas",
+      "natureza": "oficial", "responsavelInterno": ["AF"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "semanal"
+    },
+    {
+      "codigo": "CONTAS-TCU", "nome": "TCU – Jurisprudência", "linkOficial": "https://portal.tcu.gov.br/",
+      "oQueMonitorar": "Acórdãos, súmulas e boletins sobre licitações e contratos",
+      "orgaoEmissor": "Tribunal de Contas da União", "esfera": "federal", "grupo": "administrativos_contas",
+      "natureza": "oficial", "responsavelInterno": ["AJ", "CC"], "formatos": ["html", "pdf"],
+      "tipoConector": "PaginaOficial", "periodicidade": "quinzenal",
+      "configuracaoConector": {"urlListagem":"https://portal.tcu.gov.br/imprensa/noticias","seletorItem":"a[href*=\"/imprensa/noticias/\"]","seletorTitulo":"h2","seletorData":"time","seletorDescricao":"p","tipoAto":"Notícia"}
+    }
+  ]
+}

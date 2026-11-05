@@ -1,0 +1,27 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.rsuser
+packages/
+TestResults/
+*.trx
+coverage*/
+
+## IDE / SO
+.vs/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+
+## Segredos locais
+.env
+.env.*
+appsettings.*.local.json
+
+## Relatórios de avaliação gerados
+specs/*/avaliacao/relatorios/

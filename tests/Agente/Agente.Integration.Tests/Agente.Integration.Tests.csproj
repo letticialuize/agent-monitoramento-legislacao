@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <!-- WireMock.Net e EF Core Design trazem versões diferentes de Humanizer (somente testes). -->
+    <NoWarn>$(NoWarn);NU1608</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Testcontainers.MongoDb" />
+    <PackageReference Include="WireMock.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Agente\Agente.Domain\Agente.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Agente\Agente.Application\Agente.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Agente\Agente.Infrastructure\Agente.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\Agente\Api.Agente\Api.Agente.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\specs\001-monitoramento-boletim-diario\contracts\*.*" LinkBase="Contratos" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

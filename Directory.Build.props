@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <!-- CA1707: nomes de teste com sublinhado; CA1515/CA1848/CA1873: ruído para serviço interno;
+         CA1000: fábricas estáticas em Resultado<T>; CA1822: serviços de domínio são instâncias injetáveis -->
+    <NoWarn>$(NoWarn);CA1707;CA1515;CA1848;CA1873;CA2007;CA1000;CA1822;CA1859</NoWarn>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>

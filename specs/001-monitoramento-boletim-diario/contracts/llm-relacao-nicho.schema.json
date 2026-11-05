@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "llm-relacao-nicho/v1",
+  "title": "Saída do LLM: relação entre novidades e o nicho do cliente (v1)",
+  "description": "Entrada: nicho (código e descrição) e lista de novidades (id, ementa, órgão, tipo). Nunca recebe outros dados do cliente. Validação semântica: novidadeId existe na entrada; relacionada=false exige justificativa vazia ou curta; resultado sempre 'indicio_ia' com revisão humana.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["avaliacoes"],
+  "properties": {
+    "avaliacoes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["novidadeId", "relacionada", "justificativa"],
+        "properties": {
+          "novidadeId": { "type": "string" },
+          "relacionada": { "type": "boolean" },
+          "justificativa": { "type": "string", "maxLength": 500 }
+        }
+      }
+    }
+  }
+}

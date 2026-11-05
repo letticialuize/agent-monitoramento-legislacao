@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Agente.Domain\Agente.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Validação de contratos JSON da saída do LLM (exceção registrada no ADR 0006). -->
+    <PackageReference Include="JsonSchema.Net" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\..\specs\001-monitoramento-boletim-diario\contracts\llm-*.schema.json" LinkBase="Llm\Contratos" LogicalName="Contratos.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Agente.Application.Tests" />
+  </ItemGroup>
+
+</Project>
