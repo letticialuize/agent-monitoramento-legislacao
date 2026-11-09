@@ -14,6 +14,8 @@ public sealed class AgendadorColeta(
     IOptions<OpcoesColeta> opcoes,
     ILogger<AgendadorColeta> logger) : BackgroundService
 {
+    public const string NomeBloqueio = "agente.coleta";
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!opcoes.Value.Habilitada)
@@ -27,7 +29,7 @@ public sealed class AgendadorColeta(
         {
             try
             {
-                await using var trava = await bloqueio.TentarAdquirirAsync("agente.coleta", stoppingToken);
+                await using var trava = await bloqueio.TentarAdquirirAsync(NomeBloqueio, stoppingToken);
                 if (trava is null)
                 {
                     continue;
@@ -58,6 +60,8 @@ public sealed class AgendadorRetencao(
     IOptions<OpcoesRetencao> opcoes,
     ILogger<AgendadorRetencao> logger) : BackgroundService
 {
+    public const string NomeBloqueio = "agente.retencao";
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var horario = TimeOnly.TryParse(opcoes.Value.Horario, System.Globalization.CultureInfo.InvariantCulture, out var h) ? h : new TimeOnly(2, 0);
@@ -74,7 +78,7 @@ public sealed class AgendadorRetencao(
 
             try
             {
-                await using var trava = await bloqueio.TentarAdquirirAsync("agente.retencao", stoppingToken);
+                await using var trava = await bloqueio.TentarAdquirirAsync(NomeBloqueio, stoppingToken);
                 if (trava is null)
                 {
                     continue;

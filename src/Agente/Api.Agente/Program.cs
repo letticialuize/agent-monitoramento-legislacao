@@ -66,6 +66,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapGet("/saude", () => Results.Ok(new { status = "ok" }));
 app.MapConsultas();
+app.MapTarefas();
 
 await app.RunAsync();
 

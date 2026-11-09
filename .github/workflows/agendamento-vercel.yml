@@ -1,0 +1,37 @@
+# Dispara a coleta e a retenção da Api.Agente publicada na Vercel (ADR 0008).
+# Só roda depois que a variável AGENTE_API_URL e o segredo AGENTE_TOKEN_GATILHO forem configurados.
+name: Agendamento Vercel
+
+on:
+  schedule:
+    # Coleta diária às 7h de Brasília. A chamada das 7h30 só continua o que o limite de 300 s tiver interrompido.
+    - cron: "0,30 10 * * *"
+    # Retenção às 2h de Brasília.
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      tarefa:
+        description: Tarefa a executar
+        type: choice
+        options:
+          - coleta
+          - retencao
+        default: coleta
+
+permissions: {}
+
+jobs:
+  disparar:
+    if: vars.AGENTE_API_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Chamar a API
+        env:
+          API_URL: ${{ vars.AGENTE_API_URL }}
+          TOKEN: ${{ secrets.AGENTE_TOKEN_GATILHO }}
+          TAREFA: ${{ github.event.schedule == '0 5 * * *' && 'retencao' || inputs.tarefa || 'coleta' }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 320 -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            "$API_URL/api/v1/tarefas/$TAREFA"

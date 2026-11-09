@@ -21,6 +21,7 @@ Thumbs.db
 ## Segredos locais
 .env
 .env.*
+!.env.example
 appsettings.*.local.json
 
 ## Relatórios de avaliação gerados

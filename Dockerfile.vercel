@@ -1,0 +1,17 @@
+# Imagem da Api.Agente para o Container Runtime da Vercel (beta).
+# Contexto de build: raiz do repositório. Nenhum segredo entra na imagem: configure-os no provedor.
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet restore "src/Agente/Api.Agente/Api.Agente.csproj"
+RUN dotnet publish "src/Agente/Api.Agente/Api.Agente.csproj" -c Release -o /app/publish --no-restore /p:UseAppHost=false
+# As credenciais locais de desenvolvimento não vão para a imagem.
+RUN rm -f /app/publish/appsettings.Development.json
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV APP_DLL="Api.Agente.dll"
+# A Vercel envia o tráfego para a porta 80, salvo se PORT estiver definida no projeto.
+CMD ["sh", "-c", "export ASPNETCORE_URLS=\"http://0.0.0.0:${PORT:-80}\"; exec dotnet \"$APP_DLL\""]
