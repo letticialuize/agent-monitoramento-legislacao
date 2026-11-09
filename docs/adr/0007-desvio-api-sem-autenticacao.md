@@ -49,6 +49,18 @@ Decisão da responsável do projeto: publicar na Vercel, por enquanto, sem contr
 - **Prazo de revisão:** em 2026-11-09, a responsável decidiu não definir um por enquanto. A constitution
   (Seção 8.2) exige o prazo, então ele deve ser definido antes de qualquer uso além do teste.
 
+## Atualização de 2026-11-09: Swagger no ambiente publicado
+
+Decisão da responsável do projeto: manter o Swagger (`/swagger`) e o OpenAPI (`/openapi/v1.json`)
+ligados na Vercel, para a integração com o ambiente publicado.
+
+- **Como:** `Swagger:Habilitado=true`, definido no `Dockerfile.vercel`. Fora de Development, o padrão
+  continua desligado.
+- **Risco aceito:** quem tiver a URL vê as rotas e os contratos e pode testar as chamadas pela tela. As
+  rotas `/api/v1/tarefas` ficam fora do OpenAPI.
+- **Como desligar:** definir `Swagger__Habilitado=false` nas variáveis do projeto na Vercel e publicar de
+  novo.
+
 ## Como reverter
 
 Tarefa T118: restaurar o que o ADR 0004 descreve (JWT Bearer, políticas `Consulta`, `Revisao` e

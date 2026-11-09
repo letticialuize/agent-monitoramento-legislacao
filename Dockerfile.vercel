@@ -13,5 +13,8 @@ WORKDIR /app
 COPY --from=build /app/publish .
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV APP_DLL="Api.Agente.dll"
+# Swagger ligado na Vercel por decisão da responsável (ADR 0007). Para desligar sem rebuild, defina
+# Swagger__Habilitado=false nas variáveis do projeto na Vercel, que têm prioridade sobre este valor.
+ENV Swagger__Habilitado=true
 # A Vercel envia o tráfego para a porta 80, salvo se PORT estiver definida no projeto.
 CMD ["sh", "-c", "export ASPNETCORE_URLS=\"http://0.0.0.0:${PORT:-80}\"; exec dotnet \"$APP_DLL\""]

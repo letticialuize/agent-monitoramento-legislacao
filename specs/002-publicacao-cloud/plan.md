@@ -91,7 +91,7 @@ Imagem `Dockerfile.vercel`, com 389 MB, usando Postgres 17 e Mongo 8 temporário
 | `GET /saude` com `PORT=8080` e sem `PORT` | HTTP 200 nas duas portas (8080 e 80) |
 | `POST /api/v1/consultas` | HTTP 200, `concluido_com_limitacoes`, pois ainda não houve coleta |
 | Chat sem chave da OpenAI | HTTP 200, `falha_tecnica`, com aviso de LLM não configurado |
-| Swagger em produção | HTTP 404 |
+| Swagger em produção | HTTP 404 sem `Swagger:Habilitado`. Desde 2026-11-09, a Vercel liga a opção (ADR 0007) |
 | Primeira subida | Migrações aplicadas e `unaccent` criada. Um log de erro esperado: o EF consulta `__EFMigrationsHistory` antes de a tabela existir |
 | Sem variáveis, só com o `appsettings.json` local | Falha ao conectar em `127.0.0.1:55432` e o contêiner encerra com código 139 |
 

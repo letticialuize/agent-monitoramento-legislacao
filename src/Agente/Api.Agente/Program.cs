@@ -56,8 +56,9 @@ await CargaCatalogoInicial.ExecutarAsync(app.Services, CancellationToken.None);
 app.UseExceptionHandler();
 app.UseMiddleware<MiddlewareCorrelacao>();
 
-// Só em Development: a API está sem login (ADR 0007) e esta tela não deve ser exposta.
-if (app.Environment.IsDevelopment())
+// Sempre em Development. Fora dele, só com Swagger:Habilitado=true: a API está sem login (ADR 0007), então
+// a tela fica ligada apenas enquanto a responsável quiser, para a integração com o ambiente publicado.
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue("Swagger:Habilitado", false))
 {
     app.MapOpenApi();
     app.UseSwaggerUI(o => o.SwaggerEndpoint("/openapi/v1.json", "Api.Agente v1"));

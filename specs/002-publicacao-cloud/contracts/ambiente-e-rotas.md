@@ -32,7 +32,9 @@ O nome do banco no Mongo vem de `Memoria:BancoMongo` (`agente`), não da connect
 | `POST /api/v1/consultas` | Consulta estruturada, sem LLM |
 | `POST /api/v1/conversas/{conversaId}/mensagens` | Chat, com LLM e memória no Mongo |
 
-O OpenAPI e o Swagger existem só em `Development`. A2A e Agent Card não existem nesta versão.
+O OpenAPI (`/openapi/v1.json`) e o Swagger (`/swagger`) existem em `Development` e, fora dele, só com
+`Swagger:Habilitado=true`. O `Dockerfile.vercel` liga essa opção por decisão da responsável (ADR 0007,
+atualização de 2026-11-09). A2A e Agent Card não existem nesta versão.
 
 ## Rotas novas de operação
 
