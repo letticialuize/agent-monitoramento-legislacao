@@ -55,7 +55,7 @@ Decisão da responsável do projeto: manter o Swagger (`/swagger`) e o OpenAPI (
 ligados na Vercel, para a integração com o ambiente publicado.
 
 - **Como:** `Swagger:Habilitado=true`, definido no `Dockerfile.vercel`. Fora de Development, o padrão
-  continua desligado.
+  continua desligado. Com o Swagger ligado, a raiz (`/`) redireciona para `/swagger`.
 - **Risco aceito:** quem tiver a URL vê as rotas e os contratos e pode testar as chamadas pela tela. As
   rotas `/api/v1/tarefas` ficam fora do OpenAPI.
 - **Como desligar:** definir `Swagger__Habilitado=false` nas variáveis do projeto na Vercel e publicar de

@@ -28,4 +28,22 @@ public sealed class SwaggerTests(ContainersFixture containers)
         using var cliente = app.CreateClient();
         Assert.Equal(HttpStatusCode.OK, (await cliente.GetAsync(rota)).StatusCode);
     }
+
+    [Fact]
+    public async Task Com_swagger_habilitado_a_raiz_redireciona_para_o_swagger()
+    {
+        using var app = new AgenteApp(containers, extras: new() { ["Swagger:Habilitado"] = "true" });
+        using var cliente = app.CreateClient(new() { AllowAutoRedirect = false });
+        var resposta = await cliente.GetAsync("/");
+        Assert.Equal(HttpStatusCode.Redirect, resposta.StatusCode);
+        Assert.Equal("/swagger", resposta.Headers.Location?.OriginalString);
+    }
+
+    [Fact]
+    public async Task Sem_swagger_a_raiz_nao_existe()
+    {
+        using var app = new AgenteApp(containers);
+        using var cliente = app.CreateClient(new() { AllowAutoRedirect = false });
+        Assert.Equal(HttpStatusCode.NotFound, (await cliente.GetAsync("/")).StatusCode);
+    }
 }

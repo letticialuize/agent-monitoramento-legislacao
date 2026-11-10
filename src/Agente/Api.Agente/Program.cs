@@ -62,6 +62,8 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue("Swagger:Habil
 {
     app.MapOpenApi();
     app.UseSwaggerUI(o => o.SwaggerEndpoint("/openapi/v1.json", "Api.Agente v1"));
+    // A raiz abre o Swagger. Com o Swagger desligado, a raiz continua respondendo 404.
+    app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 }
 
 
