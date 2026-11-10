@@ -1,0 +1,10 @@
+{
+  "versaoContrato": "1.0",
+  "idExecucao": "8b2f0ad6-c2e4-4a68-8bdd-20f785bc798e",
+  "idSolicitacao": "e1b3a4cb-d729-4bd4-b796-b9c94be07b46",
+  "agente": { "idAgente": "agente-monitoramento-legislacao", "nome": "Agente de Monitoramento da Legislação e Jurisprudência" },
+  "status": "erro",
+  "analise": "Não foi possível analisar: o serviço de linguagem está indisponível.",
+  "achados": [],
+  "erro": { "codigo": "llm.indisponivel", "mensagem": "Não foi possível analisar: o serviço de linguagem está indisponível." }
+}

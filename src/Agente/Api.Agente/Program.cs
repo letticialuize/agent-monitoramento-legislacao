@@ -1,10 +1,12 @@
 using Agente.Application;
 using Agente.Application.Comum;
 using Agente.Infrastructure;
+using Api.Agente.A2A;
 using Api.Agente.Agendamento;
 using Api.Agente.Endpoints;
 using Api.Agente.Inicializacao;
 using Api.Agente.Observabilidade;
+using Api.Agente.Seguranca;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,10 @@ builder.Services.AddOpenApi(o => o.AddSchemaTransformer((schema, contexto, _) =>
 
     return Task.CompletedTask;
 }));
+// CORS só para o frontend da SOFIA no navegador; a SOFIA backend não depende dele (feature 003).
+builder.Services.AddCorsSofia(builder.Configuration);
+// Contrato SOFIA v1.0 e Agent Card A2A v0.3 (feature 004).
+builder.Services.AddContratoSofiaA2A(builder.Configuration);
 builder.Services.AddAplicacao();
 builder.Services.AddInfraestrutura(builder.Configuration);
 
@@ -55,6 +61,8 @@ await CargaCatalogoInicial.ExecutarAsync(app.Services, CancellationToken.None);
 
 app.UseExceptionHandler();
 app.UseMiddleware<MiddlewareCorrelacao>();
+// Sem política padrão: só as rotas marcadas com RequireCorsSofia recebem cabeçalhos CORS.
+app.UseCors();
 
 // Sempre em Development. Fora dele, só com Swagger:Habilitado=true: a API está sem login (ADR 0007), então
 // a tela fica ligada apenas enquanto a responsável quiser, para a integração com o ambiente publicado.
@@ -70,6 +78,8 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue("Swagger:Habil
 app.MapGet("/saude", () => Results.Ok(new { status = "ok" }));
 app.MapConsultas();
 app.MapTarefas();
+app.MapAgentCard();
+app.MapA2A();
 
 await app.RunAsync();
 

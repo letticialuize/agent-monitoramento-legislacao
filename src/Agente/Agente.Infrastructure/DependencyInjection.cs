@@ -76,6 +76,7 @@ public static class DependencyInjection
 
         services.AddSingleton<IMongoClient>(_ => new MongoClient(mongo));
         services.AddSingleton<IRepositorioConversas, RepositorioConversas>();
+        services.AddSingleton<IRepositorioTarefasA2A, RepositorioTarefasA2A>();
 
         // LLM
         services.AddSingleton<FabricaChatOpenAi>();

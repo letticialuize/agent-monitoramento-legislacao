@@ -62,12 +62,17 @@ public sealed partial class ResponderMensagemConversa(
     internal static string PromptDoDia(DateOnly hoje) =>
         PromptSistema + $"\n\nData de hoje: {hoje.ToString("dddd, dd/MM/yyyy", CultureInfo.GetCultureInfo("pt-BR"))} ({hoje:yyyy-MM-dd}).";
 
+    /// <param name="contextoNaoPersistido">
+    /// Conteúdo extra só para o LLM (ex.: documentos da SOFIA, já delimitados como dado não confiável).
+    /// Não vai para a memória nem para a consulta registrada (ADR 0009).
+    /// </param>
     public async Task<Resultado<RespostaMensagem>> ExecutarAsync(
         string conversaId,
         string texto,
         ContextoUsuario usuario,
         string correlacaoId,
-        CancellationToken ct)
+        CancellationToken ct,
+        string? contextoNaoPersistido = null)
     {
         ArgumentNullException.ThrowIfNull(usuario);
         texto = texto?.Trim() ?? string.Empty;
@@ -102,7 +107,8 @@ public sealed partial class ResponderMensagemConversa(
         var historico = await memoria.ObterUltimasAsync(usuario.UsuarioId, conversaId, Math.Max(0, opcoesMemoria.Value.MaxMensagens), ct);
         var contexto = new ContextoExecucao(consulta.Id, correlacaoId);
         var maxTentativas = 1 + Math.Max(0, opcoesValidacao.Value.RetentativasValidacao);
-        var mensagem = texto;
+        var mensagemBase = string.IsNullOrWhiteSpace(contextoNaoPersistido) ? texto : texto + "\n\n" + contextoNaoPersistido;
+        var mensagem = mensagemBase;
         string? erroValidacao = null;
 
         for (var tentativa = 1; tentativa <= maxTentativas; tentativa++)
@@ -156,7 +162,7 @@ public sealed partial class ResponderMensagemConversa(
             erroValidacao = string.Join("; ", violacoes);
             etapas.Concluir(etapaValidacao, StatusEtapa.Falha, erroValidacao);
             logger.LogWarning("Resposta da conversa rejeitada (tentativa {Tentativa}, execução {ExecucaoId}): {Erros}", tentativa, consulta.Id, erroValidacao);
-            mensagem = texto + "\n\n[Correção obrigatória] A resposta anterior citou links ou ids que não foram retornados pelas ferramentas: "
+            mensagem = mensagemBase + "\n\n[Correção obrigatória] A resposta anterior citou links ou ids que não foram retornados pelas ferramentas: "
                 + erroValidacao + ". Use somente dados retornados pelas ferramentas.";
         }
 

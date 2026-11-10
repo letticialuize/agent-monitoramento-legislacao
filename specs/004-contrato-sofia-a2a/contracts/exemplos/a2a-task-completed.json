@@ -1,0 +1,22 @@
+{
+  "jsonrpc": "2.0",
+  "id": "rpc-001",
+  "result": {
+    "id": "task-001",
+    "contextId": "context-001",
+    "kind": "task",
+    "status": { "state": "completed" },
+    "artifacts": [
+      {
+        "artifactId": "task-001-analise-sofia-v1",
+        "name": "analise-sofia-v1",
+        "parts": [
+          {
+            "kind": "text",
+            "text": "{\"versaoContrato\":\"1.0\",\"idExecucao\":\"8b2f0ad6-c2e4-4a68-8bdd-20f785bc798e\",\"idSolicitacao\":\"e1b3a4cb-d729-4bd4-b796-b9c94be07b46\",\"agente\":{\"idAgente\":\"agente-monitoramento-legislacao\",\"nome\":\"Agente de Monitoramento da Legislação e Jurisprudência\"},\"status\":\"concluido\",\"analise\":\"Nenhuma novidade de ICMS encontrada no período.\",\"achados\":[],\"observacoes\":[],\"erro\":null}"
+          }
+        ]
+      }
+    ]
+  }
+}

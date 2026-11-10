@@ -33,5 +33,6 @@
   <ItemGroup>
     <None Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\..\specs\001-monitoramento-boletim-diario\contracts\*.*" LinkBase="Contratos" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\..\specs\004-contrato-sofia-a2a\contracts\**\*.json" LinkBase="ContratosSofia" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

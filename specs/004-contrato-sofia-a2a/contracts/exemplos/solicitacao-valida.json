@@ -1,0 +1,12 @@
+{
+  "versaoContrato": "1.0",
+  "idExecucao": "8b2f0ad6-c2e4-4a68-8bdd-20f785bc798e",
+  "idSolicitacao": "e1b3a4cb-d729-4bd4-b796-b9c94be07b46",
+  "usuario": { "nome": "Maria Oliveira" },
+  "pergunta": "Houve novidades de ICMS que afetem as notas fiscais enviadas?",
+  "documentos": [
+    { "idDocumento": "doc-001", "nome": "NFe-123.xml", "tipo": "application/xml", "texto": "<NFe>texto extraído e normalizado da NF-e de teste</NFe>" },
+    { "idDocumento": "doc-002", "nome": "pedido.txt", "tipo": "text/plain", "texto": "Pedido de compra número 123 (documento de teste)." }
+  ],
+  "contexto": { "idioma": "pt-BR", "instrucoes": "Analisar conforme a especialidade do agente." }
+}

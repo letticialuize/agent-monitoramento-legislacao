@@ -61,6 +61,11 @@ ligados na Vercel, para a integração com o ambiente publicado.
 - **Como desligar:** definir `Swagger__Habilitado=false` nas variáveis do projeto na Vercel e publicar de
   novo.
 
+## Atualização de 2026-11-10: A2A protegido
+
+O Agent Card (`/.well-known/agent-card.json`) e o endpoint A2A (`/a2a`) exigem a chave Bearer da SOFIA
+(ADR 0010). O desvio continua valendo para `/api/v1/consultas` e `/api/v1/conversas`.
+
 ## Como reverter
 
 Tarefa T118: restaurar o que o ADR 0004 descreve (JWT Bearer, políticas `Consulta`, `Revisao` e

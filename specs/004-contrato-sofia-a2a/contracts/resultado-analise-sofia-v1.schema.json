@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://infis.local/sofia/contrato/1.0/resultado-analise-sofia.schema.json",
+  "title": "ResultadoAnaliseSofia v1.0",
+  "description": "Resposta do agente à SOFIA. Transportada como JSON em TextPart do Artifact 'analise-sofia-v1' de uma Task A2A completed. Correlação (mesmos ids da solicitação) e existência de idDocumentos são validadas pelo agente.",
+  "type": "object",
+  "required": ["versaoContrato", "idExecucao", "idSolicitacao", "agente", "status", "analise", "achados"],
+  "properties": {
+    "versaoContrato": { "const": "1.0" },
+    "idExecucao": { "$ref": "#/$defs/uuid" },
+    "idSolicitacao": { "$ref": "#/$defs/uuid" },
+    "agente": {
+      "type": "object",
+      "required": ["idAgente", "nome"],
+      "properties": {
+        "idAgente": { "$ref": "#/$defs/textoObrigatorio" },
+        "nome": { "$ref": "#/$defs/textoObrigatorio" }
+      }
+    },
+    "status": { "enum": ["concluido", "parcial", "erro"] },
+    "analise": { "$ref": "#/$defs/textoObrigatorio" },
+    "achados": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["idAchado", "descricao"],
+        "properties": {
+          "idAchado": { "$ref": "#/$defs/textoObrigatorio" },
+          "descricao": { "$ref": "#/$defs/textoObrigatorio" },
+          "idDocumentos": { "type": ["array", "null"], "items": { "type": "string" } },
+          "evidencias": { "type": ["array", "null"], "items": { "type": "string" } },
+          "severidade": { "enum": ["baixa", "media", "alta", "critica", null] }
+        }
+      }
+    },
+    "observacoes": { "type": ["array", "null"], "items": { "type": "string" } },
+    "erro": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["codigo", "mensagem"],
+          "properties": {
+            "codigo": { "$ref": "#/$defs/textoObrigatorio" },
+            "mensagem": { "$ref": "#/$defs/textoObrigatorio" }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "erro" } }, "required": ["status"] },
+      "then": { "required": ["erro"], "properties": { "erro": { "type": "object" } } },
+      "else": { "properties": { "erro": { "type": "null" } } }
+    }
+  ],
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "textoObrigatorio": { "type": "string", "pattern": "\\S" }
+  }
+}

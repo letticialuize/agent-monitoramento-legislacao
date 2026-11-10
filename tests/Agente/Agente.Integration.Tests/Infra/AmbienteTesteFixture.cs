@@ -71,6 +71,9 @@ public sealed class AgenteApp : WebApplicationFactory<Program>
 {
     public const string ChaveLlm = "sk-teste-NAO-USAR-0123456789";
 
+    /// <summary>Chave da SOFIA só para testes (a real fica fora do repositório, em SOFIA_A2A_TOKEN).</summary>
+    public const string TokenSofia = "token-sofia-teste-NAO-USAR";
+
     private readonly ContainersFixture _containers;
     private readonly bool _llmConfigurado;
     private readonly Dictionary<string, string?> _extras;
@@ -114,6 +117,7 @@ public sealed class AgenteApp : WebApplicationFactory<Program>
         builder.UseSetting("Llm:ApiKey", _llmConfigurado ? ChaveLlm : string.Empty);
         builder.UseSetting("Llm:Endpoint", OpenAi.Url + "/v1");
         builder.UseSetting("Llm:TentativasTransitorias", "1");
+        builder.UseSetting("SOFIA_A2A_TOKEN", TokenSofia);
         foreach (var (k, v) in _extras)
         {
             builder.UseSetting(k, v);
@@ -125,6 +129,18 @@ public sealed class AgenteApp : WebApplicationFactory<Program>
             s.AddSingleton<IRelogio>(new RelogioFalso(Tempo));
             s.AddSingleton<ILoggerProvider>(Logs);
         });
+    }
+
+    /// <summary>Cliente como a SOFIA: com o Bearer da integração A2A (ou outro valor, para testar recusa).</summary>
+    public HttpClient ClienteSofia(string? autorizacao = "Bearer " + TokenSofia)
+    {
+        var cliente = CreateClient();
+        if (autorizacao is not null)
+        {
+            cliente.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", autorizacao);
+        }
+
+        return cliente;
     }
 
     /// <summary>Executa um ciclo de coleta (o agendador está desabilitado nos testes).</summary>

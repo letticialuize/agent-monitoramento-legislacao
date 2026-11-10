@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddScoped<ConsultarNovidades>();
         services.AddScoped<FerramentasNovidades>();
         services.AddScoped<ResponderMensagemConversa>();
+        services.AddScoped<Sofia.AnalisarSolicitacaoSofia>();
 
         services.AddScoped<AplicarRetencao>();
         return services;

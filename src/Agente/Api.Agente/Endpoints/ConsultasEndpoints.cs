@@ -5,6 +5,7 @@ using Agente.Application.Comum.Envelope;
 using Agente.Application.Monitoramento;
 using Agente.Domain.Comum;
 using Api.Agente.Observabilidade;
+using Api.Agente.Seguranca;
 
 namespace Api.Agente.Endpoints;
 
@@ -46,7 +47,8 @@ public static class ConsultasEndpoints
 
     public static IEndpointRouteBuilder MapConsultas(this IEndpointRouteBuilder app)
     {
-        var grupo = app.MapGroup("/api/v1");
+        // Chamadas do frontend da SOFIA no navegador (feature 003). /api/v1/tarefas fica fora do CORS.
+        var grupo = app.MapGroup("/api/v1").RequireCorsSofia();
 
         // FR-010..013: só chama o caso de uso (Clean Architecture).
         grupo.MapPost("/consultas", async (ConsultaRequest req, HttpContext http, ConsultarNovidades caso, CancellationToken ct) =>

@@ -138,6 +138,17 @@ public interface IRepositorioConversas
     Task AcrescentarAsync(string usuarioId, string conversaId, IReadOnlyList<MensagemConversa> mensagens, CancellationToken ct);
 }
 
+/// <summary>
+/// Tarefas A2A já respondidas à SOFIA, para <c>tasks/get</c> (feature 006). Guarda a Task serializada
+/// (resultado do contrato, sem documentos nem nome do usuário), com expiração por TTL.
+/// </summary>
+public interface IRepositorioTarefasA2A
+{
+    Task SalvarAsync(string idTarefa, string tarefaJson, CancellationToken ct);
+
+    Task<string?> ObterAsync(string idTarefa, CancellationToken ct);
+}
+
 // ---------- E-mail (Entrega 3) ----------
 
 public sealed record MensagemEmail(string Para, string NomePara, string Assunto, string Html, string TextoPuro);

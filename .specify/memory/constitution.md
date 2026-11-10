@@ -186,6 +186,13 @@ agente ao que é necessário para o cruzamento.
 **Verificação.** O contrato de entrada DEVE aceitar apenas esses campos. Testes DEVEM provar que
 campos adicionais são rejeitados ou descartados antes de qualquer persistência ou chamada externa.
 
+**Solicitações da SOFIA (v2.1.0).** Este princípio rege o cadastro de clientes usado no cruzamento
+por nicho. O texto de documentos recebido do orquestrador SOFIA pelo contrato A2A (ADR 0009) PODE ser
+enviado ao LLM somente como contexto da pergunta, delimitado como dado não confiável (Princípio X), e
+NÃO DEVE ser persistido, registrado em log, ingerido no RAG nem associado ao cadastro de clientes. O
+nome do usuário enviado pela SOFIA NÃO DEVE ser enviado ao LLM, persistido nem registrado em log.
+Testes DEVEM provar essas restrições.
+
 ### VIII. Segmentação por perfil de público
 
 **Regra.** Cada novidade DEVE ser classificada para um ou ambos os perfis, segundo os critérios:
@@ -649,6 +656,7 @@ indicada e registrada na especificação ou em ADR.
 | DP-11 | Retenção de 30 dias para dados operacionais; cadastro de clientes e catálogo de fontes excluídos do prazo. | 4.3 |
 | DP-12 | Cadastro de clientes no PostgreSQL da Api.Agente, fora do RAG. | VII, 4.2 |
 | DP-03 | Catálogo inicial: documento "Catálogo de Fontes Confiáveis – Monitoramento Legislativo e Jurisprudencial" (2026-10-29), com critérios de confiabilidade, grupos, periodicidade e metadados. (v1.2.0) | II, 4.4 |
+| DP-18 | A2A v0.3.x, JSON-RPC 2.0, `message/send` síncrono, sem streaming nem push; contrato SOFIA v1.0 em TextPart e resposta no Artifact `analise-sofia-v1`; Agent Card público. (v2.1.0) | 3.3, VII, ADR 0009 |
 
 ### 9.2 Decisões pendentes
 
@@ -662,7 +670,6 @@ indicada e registrada na especificação ou em ADR.
 | DP-15 | Parâmetros de chunking, topK, limiares e métricas de avaliação de RAG e da análise. | Plano técnico (com avaliação) |
 | DP-16 | Política de retentativas do LLM e das ferramentas (quantidade, backoff). | Plano técnico |
 | DP-17 | Fonte e versionamento da tabela de preços para estimativa de custos. | Plano técnico |
-| DP-18 | Versão do protocolo A2A e escopo das capacidades expostas. | Especificação da integração A2A |
 | DP-19 | Ferramentas externas permitidas e seus destinos. | Especificação por ferramenta |
 | DP-20 | Requisitos não funcionais (latência, volume, disponibilidade) e ambiente de implantação. | Especificação + plano |
 | DP-21 | Retenção da base de conhecimento do RAG (documentos oficiais e versões antigas), já que o prazo de 30 dias foi definido para dados operacionais. | Esclarecimentos |
@@ -673,4 +680,8 @@ indicada e registrada na especificação ou em ADR.
 | DP-26 | Vínculo entre os papéis do catálogo (AJ, AF, CC, TI) e os usuários do sistema, a revisão humana e o envio do boletim (ex.: se o CC aprova antes do envio). | Esclarecimentos |
 | DP-27 | Quais APIs do catálogo serão usadas como ferramentas (INLABS/DOU, Senado, Câmara, LexML OAI-PMH, Querido Diário, DJEN, DataJud) e suas regras de acesso. Complementa DP-19. | Especificação por ferramenta |
 
-**Version**: 2.0.0 | **Ratified**: 2026-10-29 | **Last Amended**: 2026-11-05
+**Version**: 2.1.0 | **Ratified**: 2026-10-29 | **Last Amended**: 2026-11-10
+
+Alteração 2.1.0 (2026-11-10, MINOR, aprovada pela responsável do projeto): Princípio VII ganha a regra
+das solicitações da SOFIA; DP-18 resolvida. Impacto: features 004 e 005 e ADR 0009; nenhuma
+especificação anterior muda.
