@@ -13,7 +13,7 @@ public static class AutenticacaoSofia
     public const string ChaveConfiguracao = "SOFIA_A2A_TOKEN";
 
     public static TBuilder RequireTokenSofia<TBuilder>(this TBuilder builder)
-        where TBuilder : IEndpointConventionBuilder => builder.AddEndpointFilter(Filtrar);
+        where TBuilder : IEndpointConventionBuilder => builder.AddEndpointFilter(Filtrar).WithMetadata(new ExigeTokenSofia());
 
     private static async ValueTask<object?> Filtrar(EndpointFilterInvocationContext contexto, EndpointFilterDelegate proximo)
     {

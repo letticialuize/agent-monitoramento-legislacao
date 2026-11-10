@@ -37,6 +37,8 @@ Os testes de integração sobem PostgreSQL e MongoDB com Testcontainers: o Docke
 - Card e `/a2a` exigem `Authorization: Bearer <CHAVE>`, com a chave em `SOFIA_A2A_TOKEN` ([ADR 0010](docs/adr/0010-autenticacao-a2a-sofia.md)). As rotas REST seguem sem login ([ADR 0007](docs/adr/0007-desvio-api-sem-autenticacao.md)).
 - Cadastro na SOFIA: [specs/006-autenticacao-a2a-sofia/plan.md](specs/006-autenticacao-a2a-sofia/plan.md).
 
+Pelo Swagger: clique em **Authorize**, cole só a chave (sem `Bearer`) e use o exemplo de `message/send` já preenchido em `POST /a2a`.
+
 Chave no ambiente local (fica fora do repositório):
 
 ```bash

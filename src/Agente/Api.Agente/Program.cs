@@ -40,7 +40,7 @@ builder.Services.AddOpenApi(o => o.AddSchemaTransformer((schema, contexto, _) =>
     }
 
     return Task.CompletedTask;
-}));
+}).AddSofiaA2A());
 // CORS só para o frontend da SOFIA no navegador; a SOFIA backend não depende dele (feature 003).
 builder.Services.AddCorsSofia(builder.Configuration);
 // Contrato SOFIA v1.0 e Agent Card A2A v0.3 (feature 004).

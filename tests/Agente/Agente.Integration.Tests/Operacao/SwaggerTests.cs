@@ -40,6 +40,25 @@ public sealed class SwaggerTests(ContainersFixture containers)
     }
 
     [Fact]
+    public async Task OpenAPI_declara_o_Bearer_da_SOFIA_so_nas_rotas_A2A_e_traz_exemplo_de_message_send()
+    {
+        using var app = new AgenteApp(containers, extras: new() { ["Swagger:Habilitado"] = "true" });
+        using var cliente = app.CreateClient();
+
+        var texto = await cliente.GetStringAsync("/openapi/v1.json");
+        var doc = System.Text.Json.Nodes.JsonNode.Parse(texto)!;
+
+        var esquema = doc["components"]!["securitySchemes"]!["sofiaBearer"]!;
+        Assert.Equal("http", esquema["type"]!.GetValue<string>());
+        Assert.Equal("bearer", esquema["scheme"]!.GetValue<string>());
+        Assert.NotNull(doc["paths"]!["/a2a"]!["post"]!["security"]![0]!["sofiaBearer"]);
+        Assert.NotNull(doc["paths"]!["/.well-known/agent-card.json"]!["get"]!["security"]![0]!["sofiaBearer"]);
+        Assert.Null(doc["paths"]!["/api/v1/consultas"]!["post"]!["security"]);
+        Assert.Contains("message/send", texto, StringComparison.Ordinal);
+        Assert.DoesNotContain(AgenteApp.TokenSofia, texto, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public async Task Sem_swagger_a_raiz_nao_existe()
     {
         using var app = new AgenteApp(containers);
