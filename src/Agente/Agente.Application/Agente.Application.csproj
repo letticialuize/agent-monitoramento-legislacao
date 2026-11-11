@@ -20,4 +20,10 @@
     <InternalsVisibleTo Include="Agente.Application.Tests" />
   </ItemGroup>
 
+  <!-- Sem os contratos o build passaria e a coleta quebraria só em produção (ex.: .dockerignore excluindo specs/). -->
+  <Target Name="ExigirContratosLlm" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('..\..\..\specs\001-monitoramento-boletim-diario\contracts\llm-classificacao-novidade.schema.json') Or !Exists('..\..\..\specs\001-monitoramento-boletim-diario\contracts\llm-relacao-nicho.schema.json') Or !Exists('..\..\..\specs\001-monitoramento-boletim-diario\contracts\llm-resumo-boletim.schema.json')"
+           Text="Contratos LLM ausentes em specs/001-monitoramento-boletim-diario/contracts. Confira o .dockerignore." />
+  </Target>
+
 </Project>

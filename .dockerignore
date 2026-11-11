@@ -12,6 +12,8 @@
 .env.*
 **/appsettings.*.local.json
 specs/
+# Os schemas da saída do LLM são embutidos no Agente.Application: sem eles a coleta falha (500) na classificação.
+!specs/001-monitoramento-boletim-diario/contracts/llm-*.schema.json
 tests/
 TestResults/
 docker-compose*.yml
