@@ -20,5 +20,9 @@ ENV Swagger__Habilitado=true
 # em http: o Swagger chamaria http:// (bloqueado pelo navegador) e o Agent Card sem A2A__UrlPublica sairia http.
 # O container só recebe tráfego pela Vercel, então os cabeçalhos dela são confiáveis.
 ENV ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+# A rota de coleta tem 300 s na Vercel. Com 60 s e 2 retentativas, uma fonte fora do ar (ex.: CONFAZ)
+# consumia 3 min e a classificação pela IA era cortada (504). As fontes que respondem levam menos de 2 s.
+ENV Coleta__TimeoutPadraoSegundos=20
+ENV Coleta__TentativasPorFonte=1
 # A Vercel envia o tráfego para a porta 80, salvo se PORT estiver definida no projeto.
 CMD ["sh", "-c", "export ASPNETCORE_URLS=\"http://0.0.0.0:${PORT:-80}\"; exec dotnet \"$APP_DLL\""]
