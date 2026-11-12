@@ -63,6 +63,25 @@ public class ContratoSofiaContractTests
         Assert.True(Validador.ValidarSolicitacao(Ler<SolicitacaoAnaliseSofia>(json)).Sucesso);
     }
 
+    [Theory]
+    [InlineData("vazio")]
+    [InlineData("ausente")]
+    [InlineData("nulo")]
+    public void Pergunta_sem_documentos_e_aceita(string caso)
+    {
+        // Desvio do padrão SOFIA v1.0: perguntas de monitoramento ("novidades de ontem") não têm documento.
+        var json = Exemplo("solicitacao-valida.json");
+        switch (caso)
+        {
+            case "vazio": json["documentos"] = new JsonArray(); break;
+            case "ausente": json.Remove("documentos"); break;
+            case "nulo": json["documentos"] = null; break;
+        }
+
+        Assert.True(ValidaSchema(SchemaSolicitacao, json));
+        Assert.True(Validador.ValidarSolicitacao(Ler<SolicitacaoAnaliseSofia>(json)).Sucesso);
+    }
+
     public static TheoryData<string, string> SolicitacoesInvalidas => new()
     {
         { "sem_versao", "contrato.versao" },
@@ -71,8 +90,6 @@ public class ContratoSofiaContractTests
         { "sem_idSolicitacao", "contrato.id" },
         { "usuario_sem_nome", "contrato.usuario" },
         { "sem_pergunta", "contrato.pergunta" },
-        { "documentos_vazio", "contrato.documentos" },
-        { "sem_documentos", "contrato.documentos" },
         { "documento_texto_vazio", "contrato.documento" },
         { "documento_sem_id", "contrato.documento" },
     };
@@ -91,8 +108,6 @@ public class ContratoSofiaContractTests
             case "sem_idSolicitacao": json.Remove("idSolicitacao"); break;
             case "usuario_sem_nome": json["usuario"]!["nome"] = "  "; break;
             case "sem_pergunta": json.Remove("pergunta"); break;
-            case "documentos_vazio": docs.Clear(); break;
-            case "sem_documentos": json.Remove("documentos"); break;
             case "documento_texto_vazio": docs[0]!["texto"] = ""; break;
             case "documento_sem_id": docs[0]!.AsObject().Remove("idDocumento"); break;
         }

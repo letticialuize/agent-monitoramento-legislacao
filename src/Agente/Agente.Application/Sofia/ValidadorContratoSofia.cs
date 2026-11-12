@@ -97,9 +97,10 @@ public sealed class ValidadorContratoSofia(OpcoesContratoSofia opcoes)
 
     private void ValidarDocumentos(List<ErroDominio> erros, IReadOnlyList<DocumentoSofia>? documentos)
     {
+        // Opcional neste agente: perguntas de monitoramento ("novidades de ontem") não têm documento.
+        // Quando vierem, cada documento continua validado como no contrato padrão.
         if (documentos is null || documentos.Count == 0)
         {
-            erros.Add(new("contrato.documentos", "documentos deve ter ao menos um item."));
             return;
         }
 

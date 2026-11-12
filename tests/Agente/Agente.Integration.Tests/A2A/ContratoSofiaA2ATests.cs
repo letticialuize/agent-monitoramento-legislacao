@@ -68,7 +68,7 @@ public sealed class ContratoSofiaA2ATests
         var r = Mapeador.LerSolicitacao(new MensagemA2A("user", "m-1", [parte]));
 
         Assert.Contains(r.Erros, e => e.Codigo == "contrato.id");
-        Assert.Contains(r.Erros, e => e.Codigo == "contrato.documentos");
+        Assert.DoesNotContain(r.Erros, e => e.Codigo == "contrato.documentos");
     }
 
     [Fact]

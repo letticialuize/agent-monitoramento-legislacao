@@ -4,7 +4,7 @@
   "title": "SolicitacaoAnaliseSofia v1.0",
   "description": "Pedido da SOFIA a um agente especializado. Transportado como JSON em TextPart de uma Message A2A v0.3. Campos desconhecidos são tolerados (evolução compatível da v1); limites de tamanho são validados pelo agente.",
   "type": "object",
-  "required": ["versaoContrato", "idExecucao", "idSolicitacao", "usuario", "pergunta", "documentos"],
+  "required": ["versaoContrato", "idExecucao", "idSolicitacao", "usuario", "pergunta"],
   "properties": {
     "versaoContrato": { "const": "1.0" },
     "idExecucao": { "$ref": "#/$defs/uuid" },
@@ -16,8 +16,8 @@
     },
     "pergunta": { "$ref": "#/$defs/textoObrigatorio" },
     "documentos": {
-      "type": "array",
-      "minItems": 1,
+      "description": "Opcional neste agente (desvio do padrão SOFIA v1.0, que exige ao menos um): perguntas de monitoramento não trazem documento.",
+      "type": ["array", "null"],
       "items": {
         "type": "object",
         "required": ["idDocumento", "nome", "texto"],

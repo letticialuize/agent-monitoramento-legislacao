@@ -36,7 +36,7 @@ public sealed class AnalisarSolicitacaoSofia(
             UsuarioSofia,
             correlacaoId,
             ct,
-            DelimitarDocumentos(s.Documentos!));
+            s.Documentos is { Count: > 0 } documentos ? DelimitarDocumentos(documentos) : null);
 
         if (!resposta.Sucesso)
         {
@@ -84,7 +84,10 @@ public sealed class AnalisarSolicitacaoSofia(
             observacoes.Add("Há novidades que requerem revisão humana.");
         }
 
-        observacoes.Add(ObservacaoDocumentos);
+        if (s.Documentos is { Count: > 0 })
+        {
+            observacoes.Add(ObservacaoDocumentos);
+        }
 
         var status = env.Status == StatusProcessamento.Concluido ? StatusAnaliseSofia.Concluido : StatusAnaliseSofia.Parcial;
         return new ResultadoAnaliseSofia(ContratoSofia.Versao, s.IdExecucao!, s.IdSolicitacao!, opcoes.Agente, status,
